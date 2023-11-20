@@ -73,5 +73,11 @@
 	<string>Zocial.ttf</string>
 	<string>Fontisto.ttf</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>SelectImage</string>
+	<key>NSCameraUsageDescription</key>
+	<string>CapturePhoto</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>CaptureMicro</string>
 </dict>
 </plist>
