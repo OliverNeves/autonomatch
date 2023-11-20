@@ -1,29 +1,18 @@
 import React, {useEffect, useState} from 'react';
-import {Text, View, StyleSheet, TouchableOpacity, Modal, Linking} from 'react-native'
-import { Background, Container } from '../Login/styles';
+import {Text, View, StyleSheet, TouchableOpacity, Modal} from 'react-native'
+import { Background, Container} from '../Login/styles';
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { getDatabase, ref, get } from 'firebase/database';
 import { auth } from '../../contexts/firebaseConfig';
 import FormEmpresa from './formEmpresa';
 import { Formik } from 'formik';
-
-const openWhatsApp = (phone) => {
-  let formattedPhone = phone.startsWith('+55') ? phone : '+55' + phone;
-  let url = 'whatsapp://send?phone=' + formattedPhone;
-  Linking.canOpenURL(url).then(supported => {
-    if (supported) {
-      return Linking.openURL(url);
-    } else {
-      console.log("Não é possível abrir o WhatsApp");
-    }
-  });
-};
-
+import Eventos from './evento';
 
 
 export default function PerfilEmpresa() {
   const [userData, setUserData] = useState(null);
-  const [isModalVisible, setModalVisible] = useState(false);
+  const [isEditModalVisible, setEditModalVisible] = useState(false);
+  const [isEventModalVisible, setEventModalVisible] = useState(false);
 
   useEffect(() => {
     // Função para buscar os dados do usuário no banco de dados
@@ -47,18 +36,23 @@ export default function PerfilEmpresa() {
 
   return (
     <Background>
-      
-        {userData && (
-          <><View style={styles.header}>
-          <Text style={styles.texto}>Perfil</Text>
-          <TouchableOpacity style={styles.button} onPress={() => setModalVisible(true)} >
-              <Icon
-              name="edit"
-              size={30}
-              color='#fff'
-              />
-          </TouchableOpacity>
-         </View>
+      {userData && (
+        <>
+          <View style={styles.header}>
+            <Text style={styles.texto}>Perfil</Text>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => setEditModalVisible(true)}
+            >
+              <Icon name="edit" size={30} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.evento}
+              onPress={() => setEventModalVisible(true)}
+            >
+              <Icon name="calendar" size={30} color="#fff" />
+            </TouchableOpacity>
+          </View>
           <View style={styles.container}>
             <View style={styles.user}>
               <Icon name="user" size={115} color="#469CAC" />
@@ -66,44 +60,68 @@ export default function PerfilEmpresa() {
           </View>
           <View style={styles.dadosContainer}>
             <Text style={styles.dados}>Nome: {userData.username}</Text>
-            <TouchableOpacity onPress={() => openWhatsApp(userData.telefone)}>
-              <Text style={styles.dados}>Telefone: {userData.telefone}</Text>
-            </TouchableOpacity>
+            <Text style={styles.dados}>Telefone: {userData.telefone}</Text>
             <Text style={styles.dados}>Email: {userData.email}</Text>
             <Text style={styles.dados}>Mais informações: </Text>
-            <View style={{borderColor: '#151A24', borderWidth: 2, width: '100%', height: 240, padding: 10, marginTop: 10}}>
+            <View
+              style={{
+                borderColor: '#151A24',
+                borderWidth: 2,
+                width: '100%',
+                height: 240,
+                padding: 10,
+                marginTop: 10,
+              }}
+            >
               <Text style={styles.dados}>{userData.experiencia}</Text>
             </View>
           </View>
-          </>
-        )}
-        <Modal
-          animationType="slide"
-          visible={isModalVisible}
-          onRequestClose={() => {
-            setModalVisible(!isModalVisible);
-          }}
-        >
+        </>
+      )}
+      <Modal
+        animationType="slide"
+        visible={isEditModalVisible}
+        onRequestClose={() => setEditModalVisible(!isEditModalVisible)}
+      >
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
-          <Formik
-          initialValues={userData || {}}
-          >
-          {props => (
-            <>
-            <FormEmpresa userData={userData} />
-            <TouchableOpacity
-              style={[styles.button, styles.buttonClose]}
-              onPress={() => setModalVisible(!isModalVisible)}
-            >
-            <Text style={styles.textStyle}>Fechar</Text>
-            </TouchableOpacity>
-            </>
-          )}
-          </Formik>
+            <Formik initialValues={userData || {}}>
+              {(props) => (
+                <>
+                  <FormEmpresa userData={userData} />
+                  <TouchableOpacity
+                    style={[styles.button, styles.buttonClose]}
+                    onPress={() => setEditModalVisible(!isEditModalVisible)}
+                  >
+                    <Text style={styles.textStyle}>Fechar</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </Formik>
           </View>
         </View>
-        </Modal>
+      </Modal>
+      <Modal
+        animationType="slide"
+        visible={isEventModalVisible}
+        onRequestClose={() => setEventModalVisible(!isEventModalVisible)}
+      >
+        {/* Adicione aqui o conteúdo do segundo modal (calendário) */}
+        {/* Pode ser outro componente, formulário, etc. */}
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Formik>
+              <Eventos/>
+            </Formik>
+            <TouchableOpacity
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => setEventModalVisible(!isEventModalVisible)}
+            >
+              <Text style={styles.textStyle}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </Background>
   );
 }
@@ -165,5 +183,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 10,
     
-},
+  },
+  evento: {
+    position: 'absolute',
+    left: 10,
+    
+  },
 });
