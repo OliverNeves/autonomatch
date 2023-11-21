@@ -12,7 +12,7 @@ import { Picker } from '@react-native-picker/picker';
 const validationSchema = Yup.object().shape({
   telefone: Yup.string()
     .required('Telefone é obrigatório')
-    .matches(/^\(\d{2}\) \d{5}-\d{4}$/, 'Telefone inválido'),
+    .matches(/^\(\d{2}\) \d{4}-\d{4}$/, 'Telefone inválido'),
   dtNasc: Yup.string()
     .required('Data de Nascimento é obrigatória')
     .matches(/^\d{2}\/\d{2}\/\d{2}$/, 'Data de Nascimento inválida'),
@@ -67,7 +67,7 @@ export default function FormTerceirizado({userData}) {
                 const unmaskedText = text.replace(/\D/g, '').substring(0, 11);
 
                 const maskedText = unmaskedText.replace(
-                  /(\d{2})(\d{0,5})(\d{0,4})/,
+                  /(\d{2})(\d{0,4})(\d{0,4})/,
                   '($1) $2-$3'
                 );
             

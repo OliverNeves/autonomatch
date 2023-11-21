@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Text, View, StyleSheet, TouchableOpacity, Modal} from 'react-native'
+import {Text, View, StyleSheet, TouchableOpacity, Modal, Image} from 'react-native'
 import { Background, Container} from '../Login/styles';
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { getDatabase, ref, get } from 'firebase/database';
@@ -7,12 +7,13 @@ import { auth } from '../../contexts/firebaseConfig';
 import FormEmpresa from './formEmpresa';
 import { Formik } from 'formik';
 import Eventos from './evento';
-
+import { launchImageLibrary } from 'react-native-image-picker';
 
 export default function PerfilEmpresa() {
   const [userData, setUserData] = useState(null);
   const [isEditModalVisible, setEditModalVisible] = useState(false);
   const [isEventModalVisible, setEventModalVisible] = useState(false);
+  const [fotoSelecionada, setFotoSelecionada] = useState(null);
 
   useEffect(() => {
     // Função para buscar os dados do usuário no banco de dados
@@ -32,8 +33,27 @@ export default function PerfilEmpresa() {
     };
 
     fetchUserData();
-  }, []); // A dependência vazia faz com que a busca seja feita apenas uma vez ao montar o componente
+  }, []); 
 
+  function galeria() {
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+      selectionLimit: 1,
+    };
+
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel) {
+        console.log('Image Picker Cancelado');
+        return;
+      } else if (response.error) {
+        console.log('Gerou Erro', response.errorMessage);
+        return;
+      }
+      console.log(response.assets);
+      setFotoSelecionada(response.assets[0].uri);
+    });
+  }
   return (
     <Background>
       {userData && (
@@ -54,9 +74,15 @@ export default function PerfilEmpresa() {
             </TouchableOpacity>
           </View>
           <View style={styles.container}>
-            <View style={styles.user}>
-              <Icon name="user" size={115} color="#469CAC" />
-            </View>
+          <TouchableOpacity onPress={galeria}>
+              {fotoSelecionada ? (
+                <Image source={{ uri: fotoSelecionada }} style={styles.userImage} />
+              ) : (
+                <View style={styles.user}>
+                  <Icon name="user" size={115} color="#469CAC" />
+                </View>
+              )}
+            </TouchableOpacity>
           </View>
           <View style={styles.dadosContainer}>
             <Text style={styles.dados}>Nome: {userData.username}</Text>
@@ -188,5 +214,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 10,
     
+  },
+  userImage: {
+    width: 130,
+    height: 130,
+    borderRadius: 100,
+    marginTop: 40
   },
 });

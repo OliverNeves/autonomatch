@@ -9,6 +9,7 @@ import { getDatabase, ref, onValue } from 'firebase/database';
 import Icon from 'react-native-vector-icons/EvilIcons'
 import { Picker } from '@react-native-picker/picker';
 
+
 export default function HomeTerceirizado({ navigation }) {
     const [eventos, setEventos] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -21,8 +22,6 @@ export default function HomeTerceirizado({ navigation }) {
     useEffect(() => {
         const db = getDatabase();
         const eventosRef = ref(db, 'eventos');
-
-
 
         onValue(eventosRef, (snapshot) => {
             const data = snapshot.val();
@@ -56,7 +55,7 @@ export default function HomeTerceirizado({ navigation }) {
             </View>
 
             <View style={styles.searchContainer}>
-                <Feather name="search" size={20} color="#121212" style={styles.searchIcon} />
+                
                 <Searchbar
                     placeholder="Pesquisar"
                     onChangeText={query => setSearchQuery(query)}
