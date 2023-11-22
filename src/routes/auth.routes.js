@@ -2,7 +2,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs'
 import Feather from "react-native-vector-icons/Feather"
-import { TouchableOpacity } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 
 import Login from '../pages/Login';
 import Cadastro from '../pages/Cadastro';
@@ -15,6 +15,8 @@ import MensagemTerceirizado from '../pages/Terceirizado/mensagemTerceirizado';
 import PerfilTerceirizado from '../pages/Terceirizado/perfilTerceirizado';
 import FormEmpresa from '../pages/Empresa/formEmpresa';
 import FormTerceirizado from '../pages/Terceirizado/formTerceirizado';
+import MeusEventos from '../pages/Empresa/meusEventos';
+import { transparent } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
 
 
 const AuthStack = createNativeStackNavigator();
@@ -47,6 +49,17 @@ function RotaEmpresa(){
                 }
             }}
             />
+            <Tab.Screen
+            name='MeusEventos'
+            component={MeusEventos}
+            options={{
+                tabBarLabel: "Eventos",
+                tabBarIcon: ({color, size}) =>{
+                    return <MaterialIcons name="event-available" color={color} size={size}/>
+                }
+            }}
+            />
+            
             <Tab.Screen
             name='Perfil'
             component={PerfilEmpresa}
@@ -163,6 +176,7 @@ function AuthRoutes(){
                 headerShown: false,
             }}
             />
+            
         </AuthStack.Navigator>
        
     )

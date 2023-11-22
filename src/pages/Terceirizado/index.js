@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react'
-import { TouchableOpacity, StyleSheet, Modal } from "react-native"
+import { TouchableOpacity, StyleSheet, Modal, Alert } from "react-native"
 import { Text, Card, Searchbar } from 'react-native-paper';
 import { Background } from '../Login/styles';
 import Feather from "react-native-vector-icons/Feather"
 import { deslogar } from '../../contexts/auth';
 import { FlatList, View } from 'react-native';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import { getDatabase, ref, onValue, set, get, push } from 'firebase/database';
 import Icon from 'react-native-vector-icons/EvilIcons'
 import { Picker } from '@react-native-picker/picker';
+import { auth } from '../../contexts/firebaseConfig';
 
 
 export default function HomeTerceirizado({ navigation }) {
@@ -17,7 +18,33 @@ export default function HomeTerceirizado({ navigation }) {
     const [selectedEmployeeType, setSelectedEmployeeType] = useState('');
     const [selectedEvent, setSelectedEvent] = useState(null);
 
-
+    const candidatarEvento = async () => {
+        try {
+            if (!selectedEvent) {
+                // Adicione um tratamento para o caso de não haver um evento selecionado
+                return;
+            }
+    
+            const db = getDatabase();
+            const usuarioCandidaturasRef = ref(db, `users/${auth.currentUser.uid}/candidaturas`);
+            const novaCandidaturaRef = push(usuarioCandidaturasRef);
+    
+            const snapshot = await get(novaCandidaturaRef);
+            const candidatura = snapshot.val();
+    
+            await set(novaCandidaturaRef, {
+                ...candidatura,
+                eventId: selectedEvent.eventId,  // Adicione a referência do evento à candidatura
+                // Outras informações da candidatura
+            });
+    
+            setSelectedEvent(null);
+    
+            Alert.alert('Candidatura enviada', 'Sua candidatura foi enviada com sucesso.');
+        } catch (error) {
+            console.error('Erro ao enviar candidatura:', error);
+        }
+    };
 
     useEffect(() => {
         const db = getDatabase();
@@ -55,7 +82,7 @@ export default function HomeTerceirizado({ navigation }) {
             </View>
 
             <View style={styles.searchContainer}>
-                
+
                 <Searchbar
                     placeholder="Pesquisar"
                     onChangeText={query => setSearchQuery(query)}
@@ -124,13 +151,13 @@ export default function HomeTerceirizado({ navigation }) {
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
                         <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={() => {
-                        setSelectedEvent(null);
-                    }}
-                >
-                    <Text style={styles.textStyle}>X</Text>
-                </TouchableOpacity>
+                            style={styles.closeButton}
+                            onPress={() => {
+                                setSelectedEvent(null);
+                            }}
+                        >
+                            <Text style={styles.textStyle}>X</Text>
+                        </TouchableOpacity>
                         {selectedEvent && (
                             <>
                                 <Text style={styles.textoModal}>Evento: {selectedEvent.nomeEvento}</Text>
@@ -141,17 +168,14 @@ export default function HomeTerceirizado({ navigation }) {
                                 <Text style={styles.textoModal}>Vagas Cozinheiro(a): {selectedEvent.cozinheiroCount}</Text>
                                 <Text style={styles.textoModal}>Vagas Garçom / Garçonete: {selectedEvent.garcomCount}</Text>
                                 <Text style={styles.textoModal}>Vagas Serviços Gerais: {selectedEvent.servicosGeraisCount}</Text>
-                                
+
                                 <TouchableOpacity
-                                    style={{ ...styles.openButton,  backgroundColor: "#121212" }}
-                                    onPress={() => {
-                                        // Adicione aqui a lógica para se candidatar ao evento
-                                        setSelectedEvent(null);
-                                    }}
+                                    style={{ ...styles.openButton, backgroundColor: "#121212" }}
+                                    onPress={candidatarEvento}
                                 >
                                     <Text style={styles.textStyle}>Candidatar-se</Text>
                                 </TouchableOpacity>
-            
+
                             </>
                         )}
                     </View>
@@ -256,7 +280,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         textAlign: "center"
     },
-    textoModal:{
+    textoModal: {
         color: "#FFF",
         alignSelf: 'flex-start',
         margin: 2

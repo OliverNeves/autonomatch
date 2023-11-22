@@ -4,7 +4,7 @@ import { TextInput } from 'react-native-paper';
 import { Background, Container, SubmitText } from '../Login/styles';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { getDatabase, ref, set } from 'firebase/database';
+import { getDatabase, ref, set, push } from 'firebase/database';
 import { auth } from '../../contexts/firebaseConfig';
 import Icon from 'react-native-vector-icons/FontAwesome'
 
@@ -34,26 +34,31 @@ export default function Eventos() {
         const db = getDatabase();
         const user = auth.currentUser;
         const userId = user.uid;
-
+      
         const eventosRef = ref(db, `eventos/${userId}`);
-
+      
         try {
-            // Adicione o número de funcionários para cada categoria
-            const eventoCompleto = {
-                ...eventoData,
-                cozinheiroCount,
-                auxiliarCount,
-                garcomCount,
-                servicosGeraisCount,
-            };
-
-            await set(eventosRef, eventoCompleto);
-
-            console.log('Dados do evento salvos com sucesso!');
+          // Generate a unique event ID
+          const eventId = push(eventosRef).key;
+      
+          // Add the number of employees for each category
+          const eventoCompleto = {
+            ...eventoData,
+            eventId,
+            cozinheiroCount,
+            auxiliarCount,
+            garcomCount,
+            servicosGeraisCount,
+          };
+      
+          // Save the event data to the database
+          await set(ref(db, `eventos/${userId}/${eventId}`), eventoCompleto);
+      
+          console.log('Dados do evento salvos com sucesso!');
         } catch (error) {
-            console.error('Erro ao salvar dados do evento:', error);
+          console.error('Erro ao salvar dados do evento:', error);
         }
-    };
+      };
 
     return (
         <Background>

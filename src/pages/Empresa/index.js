@@ -8,7 +8,7 @@ import Icon from 'react-native-vector-icons/EvilIcons'
 import { getDatabase, ref, onValue } from 'firebase/database';
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { Picker } from '@react-native-picker/picker';
-import { Linking } from 'react-native';
+
 
 
 export default function HomeEmpresa({ navigation }) {
@@ -55,6 +55,7 @@ export default function HomeEmpresa({ navigation }) {
     return (
         <Background>
             <View style={styles.header}>
+
                 <Text style={styles.texto}>Candidatos</Text>
                 <TouchableOpacity style={styles.button} onPress={() => deslogar(navigation)}>
                     <Feather
@@ -126,9 +127,7 @@ export default function HomeEmpresa({ navigation }) {
                         </View>
                         <View style={styles.dadosContainer}>
                             <Text style={styles.dados}>Nome: {selectedUser.nome}</Text>
-                            <TouchableOpacity onPress={() => openWhatsApp(selectedUser.telefone)}>
                             <Text style={styles.dados}>Telefone: {selectedUser.telefone}</Text>
-                            </TouchableOpacity>
                             <Text style={styles.dados}>Email: {selectedUser.email}</Text>
                             <Text style={styles.dados}>Data de Nascimento: {selectedUser.dtNasc}</Text>
                             <Text style={styles.dados}>Especialidade: {
