@@ -11,7 +11,6 @@ export default function MeusEventos() {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
 
-
     const openModal = (event) => {
         setSelectedEvent(event);
         setModalVisible(true);
@@ -22,38 +21,23 @@ export default function MeusEventos() {
         setModalVisible(false);
     };
 
-
-
-
     const buscarEventos = async () => {
         const db = getDatabase();
         const user = auth.currentUser;
         const userId = user.uid;
-    
+
         const eventosRef = ref(db, `eventos/${userId}`);
         const candidaturasRef = ref(db, 'candidaturas');
-    
+
         try {
             const eventosSnapshot = await get(eventosRef);
             const eventos = eventosSnapshot.val();
-    
+
             if (eventos) {
-                const eventosArray = Object.values(eventos);
+                const eventosArray = Object.values(eventos).filter(
+                    (evento) => evento && evento.nomeEvento
+                );
                 setEventos(eventosArray);
-    
-                // If there's a selectedEvent, fetch candidaturas for that event
-                if (selectedEvent) {
-                    const candidaturasEventoRef = ref(candidaturasRef, selectedEvent.eventId);
-                    const candidaturasSnapshot = await get(candidaturasEventoRef);
-                    const candidaturasEvento = candidaturasSnapshot.val();
-    
-                    if (candidaturasEvento) {
-                        const candidaturasArray = Object.values(candidaturasEvento);
-                        setCandidaturas(candidaturasArray);
-                    } else {
-                        setCandidaturas([]);
-                    }
-                }
             } else {
                 setEventos([]);
             }
@@ -61,16 +45,14 @@ export default function MeusEventos() {
             console.error('Erro ao buscar eventos:', error);
         }
     };
+
     useEffect(() => {
         buscarEventos();
     }, []);
 
     return (
         <Background>
-
-            <Text style={styles.title}>
-                Meus Eventos
-            </Text>
+            <Text style={styles.title}>Meus Eventos</Text>
 
             {eventos.length > 0 ? (
                 <FlatList
@@ -83,13 +65,11 @@ export default function MeusEventos() {
                                     {item.nomeEvento && (
                                         <Text style={styles.cardTitle}>{item.nomeEvento}</Text>
                                     )}
-
                                 </Card.Content>
                             </Card>
                         </TouchableOpacity>
                     )}
                 />
-
             ) : (
                 <Text style={styles.noEventsText}>Nenhum evento encontrado.</Text>
             )}
