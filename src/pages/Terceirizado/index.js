@@ -29,14 +29,15 @@ export default function HomeTerceirizado({ navigation }) {
             const usuarioCandidaturasRef = ref(db, `users/${auth.currentUser.uid}/candidaturas`);
             const novaCandidaturaRef = push(usuarioCandidaturasRef);
     
-            const snapshot = await get(novaCandidaturaRef);
-            const candidatura = snapshot.val();
-    
+            // Adicionando a referência do evento à candidatura
             await set(novaCandidaturaRef, {
-                ...candidatura,
-                eventId: selectedEvent.eventId,  // Adicione a referência do evento à candidatura
+                eventId: selectedEvent.eventId,
                 // Outras informações da candidatura
             });
+    
+            // Enviar notificação para o criador do evento
+            // const notificationMessage = `Novo candidato para o evento: ${selectedEvent.nomeEvento}`;
+            // await sendNotification(selectedEvent.criadorId, notificationMessage);
     
             setSelectedEvent(null);
     
@@ -45,20 +46,31 @@ export default function HomeTerceirizado({ navigation }) {
             console.error('Erro ao enviar candidatura:', error);
         }
     };
+    
 
     useEffect(() => {
-        const db = getDatabase();
-        const eventosRef = ref(db, 'eventos');
+    const db = getDatabase();
+    const eventosRef = ref(db, 'eventos');
 
-        onValue(eventosRef, (snapshot) => {
-            const data = snapshot.val();
-            const temp = [];
-            for (let id in data) {
-                temp.push({ id, ...data[id] });
+    onValue(eventosRef, (snapshot) => {
+        const data = snapshot.val();
+        const temp = [];
+        for (let userId in data) {
+            for (let eventId in data[userId]) {
+                const evento = {
+                    userId,
+                    eventId,
+                    criadorNome: data[userId].nome,  // Assumindo que o nome do usuário está armazenado no nó do usuário
+                    ...data[userId][eventId],
+                };
+                temp.push(evento);
             }
-            setEventos(temp);
-        });
-    }, []);
+        }
+        setEventos(temp);
+    });
+}, []);
+
+
     const calcularTotalVagas = (evento) => {
         return (
             evento.cozinheiroCount +
@@ -96,18 +108,25 @@ export default function HomeTerceirizado({ navigation }) {
 
             </View>
             <FlatList
-                data={eventos.filter(item => item.nomeEvento.toLowerCase().includes(searchQuery.toLowerCase()))}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                    <Card style={styles.card} onPress={() => setSelectedEvent(item)}>
-                        <Card.Content style={styles.cardContent}>
-                            <Text style={styles.cardTitle}>{item.nomeEvento}</Text>
-                            <Text style={styles.cardSubtitle}>{`Total de Vagas: ${calcularTotalVagas(item)}`}</Text>
-                            <Text>{item.data}</Text>
-                        </Card.Content>
-                    </Card>
-                )}
-            />
+    data={eventos.filter(item => {
+        const nomeEventoLowerCase = (item.nomeEvento || '').toLowerCase();
+        const searchQueryLowerCase = (searchQuery || '').toLowerCase();
+        
+        // Filtra por nome do evento e outros critérios, se necessário
+        return nomeEventoLowerCase.includes(searchQueryLowerCase);
+    })}
+    keyExtractor={(item) => item.eventId}
+    renderItem={({ item }) => (
+        <Card style={styles.card} onPress={() => setSelectedEvent(item)}>
+            <Card.Content style={styles.cardContent}>
+                <Text style={styles.cardTitle}>{item.nomeEvento}</Text>
+                <Text style={styles.cardSubtitle}>{`Total de Vagas: ${calcularTotalVagas(item)}`}</Text>
+                <Text>{item.data}</Text>
+            </Card.Content>
+        </Card>
+    )}
+/>
+
             <Modal
                 animationType="slide"
                 transparent={true}
