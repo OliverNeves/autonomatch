@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "553887373831",
+    "firebase_url": "https://autonomatch-default-rtdb.firebaseio.com",
+    "project_id": "autonomatch",
+    "storage_bucket": "autonomatch.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:553887373831:android:f180e84efbdef039a828a2",
+        "android_client_info": {
+          "package_name": "com.autonomatch.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_Owj79sGRFLyytYZqXQren1PHVPktnxU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
