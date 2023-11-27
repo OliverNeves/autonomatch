@@ -82,7 +82,7 @@ export default function PerfilTerceirizado() {
           </View>
           <View style={styles.dadosContainer}>
             <Text style={styles.dados}>Nome: {userData.username}</Text>
-            <Text style={styles.dados}>Telefone: {userData.telefone.startsWith('+55') ? userData.telefone : '+55' + userData.telefone}</Text>
+            <Text style={styles.dados}>Telefone: {userData.telefone}</Text>
             <Text style={styles.dados}>Email: {userData.email}</Text>
             <Text style={styles.dados}>Data de Nascimento: {userData.dtNasc}</Text>
             <Text style={styles.dados}>Especialidade: {

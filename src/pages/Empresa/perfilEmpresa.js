@@ -1,6 +1,6 @@
-import React, {useEffect, useState} from 'react';
-import {Text, View, StyleSheet, TouchableOpacity, Modal, Image} from 'react-native'
-import { Background, Container} from '../Login/styles';
+import React, { useEffect, useState } from 'react';
+import { Text, View, StyleSheet, TouchableOpacity, Modal, Image, Linking } from 'react-native'
+import { Background, Container } from '../Login/styles';
 import Icon from 'react-native-vector-icons/FontAwesome'
 import { getDatabase, ref, get } from 'firebase/database';
 import { auth } from '../../contexts/firebaseConfig';
@@ -8,6 +8,26 @@ import FormEmpresa from './formEmpresa';
 import { Formik } from 'formik';
 import Eventos from './evento';
 import { launchImageLibrary } from 'react-native-image-picker';
+
+export const abrirWhatsApp = (telefone) => {
+   
+
+  const codigoPais = '+55';
+
+  const numeroWhatsApp = codigoPais + telefone;
+
+  const url = `whatsapp://send?phone=${numeroWhatsApp}`;
+
+  Linking.openURL(url)
+    .then((data) => {
+      console.log('WhatsApp aberto com sucesso:', data);
+    })
+    .catch((error) => {
+      console.error('Erro ao abrir o WhatsApp:', error);
+    });
+};
+
+
 
 export default function PerfilEmpresa() {
   const [userData, setUserData] = useState(null);
@@ -33,7 +53,7 @@ export default function PerfilEmpresa() {
     };
 
     fetchUserData();
-  }, []); 
+  }, []);
 
   function galeria() {
     const options = {
@@ -74,7 +94,7 @@ export default function PerfilEmpresa() {
             </TouchableOpacity>
           </View>
           <View style={styles.container}>
-          <TouchableOpacity onPress={galeria}>
+            <TouchableOpacity onPress={galeria}>
               {fotoSelecionada ? (
                 <Image source={{ uri: fotoSelecionada }} style={styles.userImage} />
               ) : (
@@ -137,7 +157,7 @@ export default function PerfilEmpresa() {
         <View style={styles.centeredView}>
           <View style={styles.modalView}>
             <Formik>
-              <Eventos/>
+              <Eventos />
             </Formik>
             <TouchableOpacity
               style={[styles.button, styles.buttonClose]}
@@ -155,7 +175,7 @@ export default function PerfilEmpresa() {
 const styles = StyleSheet.create({
   modalView: {
     width: '100%',
-    height:'100%'
+    height: '100%'
   },
   buttonClose: {
     backgroundColor: "#151A24",
@@ -168,7 +188,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center"
   },
-  header:{
+  header: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -180,40 +200,40 @@ const styles = StyleSheet.create({
     fontSize: 25,
     color: 'white',
   },
-  container:{
+  container: {
     flex: 1,
     justifyContent: 'flex-start',
     alignItems: 'center'
   },
-  user:{
-    alignItems:'center',
+  user: {
+    alignItems: 'center',
     backgroundColor: 'white',
     marginTop: 30,
     borderRadius: 100,
     height: 130,
-    width:130,
+    width: 130,
     marginBottom: 20,
   },
-  dados:{
+  dados: {
     color: 'white',
     fontSize: 20
   },
-  dadosContainer:{
-    flex:1,
+  dadosContainer: {
+    flex: 1,
     justifyContent: 'flex-start',
-    alignItems:"flex-start",
+    alignItems: "flex-start",
     marginTop: -170,
     padding: 20
   },
   button: {
     position: 'absolute',
     right: 10,
-    
+
   },
   evento: {
     position: 'absolute',
     left: 10,
-    
+
   },
   userImage: {
     width: 130,

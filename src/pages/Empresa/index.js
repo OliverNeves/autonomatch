@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/EvilIcons'
 import { getDatabase, ref, onValue } from 'firebase/database';
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { Picker } from '@react-native-picker/picker';
+import { abrirWhatsApp } from './perfilEmpresa';
 
 
 
@@ -127,7 +128,9 @@ export default function HomeEmpresa({ navigation }) {
                         </View>
                         <View style={styles.dadosContainer}>
                             <Text style={styles.dados}>Nome: {selectedUser.nome}</Text>
-                            <Text style={styles.dados}>Telefone: {selectedUser.telefone}</Text>
+                            <TouchableOpacity onPress={abrirWhatsApp(selectedUser.telefone)}>
+                                <Text style={styles.dados}>Telefone: {selectedUser.telefone}</Text>
+                            </TouchableOpacity>
                             <Text style={styles.dados}>Email: {selectedUser.email}</Text>
                             <Text style={styles.dados}>Data de Nascimento: {selectedUser.dtNasc}</Text>
                             <Text style={styles.dados}>Especialidade: {

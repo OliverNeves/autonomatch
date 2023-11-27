@@ -2,15 +2,14 @@ import { getDatabase, ref, get, update} from "firebase/database";
 import { pegarToken } from "../pages/Login";
 import messaging from '@react-native-firebase/messaging'
 
-export const contratar = async (terceirizadoId, eventId) => {
+export const contratar = async (selectedUser, selectedEvent) => {
+  const terceirizadoId = selectedUser.id;
+  const eventId = selectedEvent.id
     try {
-      // Aqui você confirma a contratação do terceirizado
-      // ...
+      
+      const token = await pegarToken(terceirizadoId); 
   
-      // Depois de confirmar a contratação, obtenha o token do dispositivo do terceirizado
-      const token = await pegarToken(terceirizadoId); // assumindo que obterTokenDispositivo aceita um ID de usuário como argumento
-  
-      // Em seguida, envie a notificação para o terceirizado
+      
       await sendNotification(token, 'Você foi contratado!');
   
       console.log('Terceirizado contratado e notificado com sucesso.');

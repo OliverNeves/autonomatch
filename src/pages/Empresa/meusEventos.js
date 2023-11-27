@@ -6,6 +6,8 @@ import { getDatabase, ref, get } from 'firebase/database';
 import { auth } from '../../contexts/firebaseConfig';
 import Feather from 'react-native-vector-icons/Feather'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import { abrirWhatsApp } from './perfilEmpresa';
+import { contratar } from '../../contexts/contratar';
 
 export default function MeusEventos() {
     const [eventos, setEventos] = useState([]);
@@ -209,7 +211,9 @@ export default function MeusEventos() {
                         </View>
                         <View style={styles.dadosContainer}>
                             <Text style={styles.dados}>Nome: {selectedUser.username}</Text>
-                            <Text style={styles.dados}>Telefone: {selectedUser.telefone}</Text>
+                            <TouchableOpacity onPress={abrirWhatsApp(selectedUser.telefone)}>
+                                <Text style={styles.dados}>Telefone: {selectedUser.telefone}</Text>
+                            </TouchableOpacity>
                             <Text style={styles.dados}>Email: {selectedUser.email}</Text>
                             <Text style={styles.dados}>Data de Nascimento: {selectedUser.dtNasc}</Text>
                             <Text style={styles.dados}>Especialidade: {
@@ -226,19 +230,13 @@ export default function MeusEventos() {
                             <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
                             <TouchableOpacity
                                 style={styles.contratar}
-                                onPress={() => {
-                                    // Adicione aqui a lógica para se candidatar ao evento
-                                    setSelectedUser(null);
-                                }}
+                                onPress={() => contratar(selectedUser, selectedEvent)}
                             >
                                 <Text style={styles.textStyle}>Contratar</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.contratar}
-                                onPress={() => {
-                                    // Adicione aqui a lógica para se candidatar ao evento
-                                    setSelectedUser(null);
-                                }}
+                                
                             >
                                 <Text style={styles.textStyle}>Recusar</Text>
                             </TouchableOpacity>
