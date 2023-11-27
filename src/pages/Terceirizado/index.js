@@ -11,6 +11,7 @@ import { Picker } from '@react-native-picker/picker';
 import { auth } from '../../contexts/firebaseConfig';
 
 
+
 export default function HomeTerceirizado({ navigation }) {
     const [eventos, setEventos] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -68,6 +69,7 @@ export default function HomeTerceirizado({ navigation }) {
         }
         setEventos(temp);
     });
+
 }, []);
 
 

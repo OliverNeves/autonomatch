@@ -3,15 +3,28 @@ import {Platform, Keyboard, ActivityIndicator, TouchableOpacity} from 'react-nat
 import { TextInput, HelperText } from "react-native-paper";
 import { Alerta } from "../../componentes/Alerta";
 import { auth } from "../../contexts/firebaseConfig";
-import { getDatabase, ref, get } from "firebase/database";
+import { getDatabase, ref, get, update } from "firebase/database";
 import Feather from 'react-native-vector-icons/Feather'
-
 import {Background, Container, Logo, AreaInput, SubmitButton, SubmitText,
     Reset, ResetText,Cadastrar, CadastrarText, Registro
 } from './styles';
-
+import messaging from "@react-native-firebase/messaging"
 import {useNavigation} from '@react-navigation/native';
 import { realizarLogin } from "../../contexts/auth";
+
+export async function pegarToken(usuario) {
+  try {
+    const token = await messaging().getToken();
+    const db = getDatabase();
+    const userRef = ref(db, 'users/' + usuario.uid);
+    await update(userRef, { fcmToken: token });
+
+    console.log('Token do Dispositivo Armazenado:', token);
+    return token;
+  } catch (error) {
+    console.error('Erro ao obter e armazenar o token do dispositivo:', error);
+  }
+}
 
 export default function Login(){
     const navigation = useNavigation();
@@ -22,11 +35,13 @@ export default function Login(){
     const [isLoading, setIsLoading] = useState(false);
     const [mostrarSenha, setMostrarSenha] = useState(false);
 
+    
 
     useEffect(() => {
+      
       const estadoUsuario = auth.onAuthStateChanged(usuario => {
         if (usuario) {
-          setIsLoading(true); // Inicia o indicador de carregamento
+          setIsLoading(true);// Inicia o indicador de carregamento
           const db = getDatabase();
           const userRef = ref(db, 'users/' + usuario.uid);
   
@@ -44,6 +59,9 @@ export default function Login(){
                 // Caso o tipo de usuário não seja reconhecido
                 // Você pode adicionar uma lógica aqui para lidar com isso
               }
+              if (usuario) {
+                pegarToken(usuario);
+              }
             })
             .catch(error => {
               console.error("Erro ao obter informações do usuário:", error);
@@ -52,10 +70,12 @@ export default function Login(){
               setIsLoading(false); // Finaliza o indicador de carregamento
             });
         }
+        
       });
-  
+      
       return () => estadoUsuario();
     }, []);
+    
       
 
     async function handleLogin(){
