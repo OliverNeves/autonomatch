@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity, Modal, View, ScrollView} from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, Modal, View, ScrollView } from 'react-native';
 import { Card, Text } from 'react-native-paper';
 import { Background } from '../Login/styles';
 import { getDatabase, ref, get } from 'firebase/database';
@@ -17,8 +17,8 @@ export default function MeusEventos() {
     const [usersData, setUsersData] = useState({});
     const [userModalVisible, setUserModalVisible] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    
-    
+
+
 
     const openUserModal = (userId) => {
         setSelectedUser(usersData[userId]);
@@ -164,29 +164,29 @@ export default function MeusEventos() {
                         <View style={styles.modalContent}>
                             <Text style={styles.title}>Candidatos</Text>
                             {candidaturas.length > 0 ? (
-    <FlatList
-        data={candidaturas}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => {
-            if (item.userId) {
-                const candidato = usersData[item.userId];
-                if (candidato) {
-                    return (
-                        <TouchableOpacity style={styles.cardCandidato} onPress={() => openUserModal(item.userId)}>
-                            <Text style={styles.nomeCandidato}>{candidato.username}</Text>
-                        </TouchableOpacity>
-                    );
-                } else {
-                    return null; 
-                }
-            } else {
-                console.log('userId não definido para o item:', item);
-                return null;
-            }
-        }} />
-) : (
-    <Text>Nenhuma candidatura encontrada para este evento.</Text>
-)}
+                                <FlatList
+                                    data={candidaturas}
+                                    keyExtractor={(item) => item.id}
+                                    renderItem={({ item }) => {
+                                        if (item.userId) {
+                                            const candidato = usersData[item.userId];
+                                            if (candidato) {
+                                                return (
+                                                    <TouchableOpacity style={styles.cardCandidato} onPress={() => openUserModal(item.userId)}>
+                                                        <Text style={styles.nomeCandidato}>{candidato.username}</Text>
+                                                    </TouchableOpacity>
+                                                );
+                                            } else {
+                                                return null;
+                                            }
+                                        } else {
+                                            console.log('userId não definido para o item:', item);
+                                            return null;
+                                        }
+                                    }} />
+                            ) : (
+                                <Text>Nenhuma candidatura encontrada para este evento.</Text>
+                            )}
                         </View>
                     )}
                     <TouchableOpacity style={styles.button} onPress={closeModal}>
@@ -233,27 +233,30 @@ export default function MeusEventos() {
                             <ScrollView style={{ borderColor: '#5B8BDF', borderWidth: 2, width: '100%', height: 150, padding: 10 }}>
                                 <Text style={styles.dados}>{selectedUser.experiencia}</Text>
                             </ScrollView>
-                            <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-                            <TouchableOpacity
-    style={styles.contratar}
-    onPress={() => {
-        if (selectedUser && selectedEvent) {
-            diminuirVaga(selectedUser, selectedEvent);
-        } else {
-            console.error("Usuário ou evento não selecionado.");
-        }
-    }}
->
-    <Text style={styles.textStyle}>Contratar</Text>
-</TouchableOpacity>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                                <TouchableOpacity
+                                    style={styles.contratar}
+                                    onPress={() => {
+                                        console.log(selectedUser)
+                                        console.log(selectedEvent)
+                                        console.log("$$$$$$$$$$$$$$$$$")
+                                        if (selectedUser && selectedEvent) {
+                                            diminuirVaga(selectedUser, selectedEvent);
+                                        } else {
+                                            console.error("Usuário ou evento não selecionado.");
+                                        }
+                                    }}
+                                >
+                                    <Text style={styles.textStyle}>Contratar</Text>
+                                </TouchableOpacity>
 
-                            <TouchableOpacity
-                                style={styles.contratar}
-                                
-                            >
-                                <Text style={styles.textStyle}>Recusar</Text>
-                            </TouchableOpacity>
-                            
+                                <TouchableOpacity
+                                    style={styles.contratar}
+
+                                >
+                                    <Text style={styles.textStyle}>Recusar</Text>
+                                </TouchableOpacity>
+
                             </View>
                         </View>
 

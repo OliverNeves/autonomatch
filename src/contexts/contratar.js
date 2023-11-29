@@ -31,6 +31,7 @@ import messaging from '@react-native-firebase/messaging'
   
 
   export const diminuirVaga = async (selectedUser, selectedEvent) => {
+    
     if (!selectedUser || !selectedEvent) {
         throw new Error('Usuário ou evento inválido.');
     }

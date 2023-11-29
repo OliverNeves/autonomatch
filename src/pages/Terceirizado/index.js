@@ -33,7 +33,10 @@ export default function HomeTerceirizado({ navigation }) {
             // Adicionando a referência do evento à candidatura
             await set(novaCandidaturaRef, {
                 eventId: selectedEvent.eventId,
-                // Outras informações da candidatura
+                nomeEvento: selectedEvent.nomeEvento,
+                data: selectedEvent.data,
+                local: selectedEvent.local,
+                horario: selectedEvent.horario
             });
     
             // Enviar notificação para o criador do evento
