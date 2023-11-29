@@ -7,7 +7,7 @@ import { auth } from '../../contexts/firebaseConfig';
 import Feather from 'react-native-vector-icons/Feather'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { abrirWhatsApp } from './perfilEmpresa';
-import { contratar } from '../../contexts/contratar';
+import { diminuirVaga } from '../../contexts/contratar';
 
 export default function MeusEventos() {
     const [eventos, setEventos] = useState([]);
@@ -17,6 +17,8 @@ export default function MeusEventos() {
     const [usersData, setUsersData] = useState({});
     const [userModalVisible, setUserModalVisible] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
+    
+    
 
     const openUserModal = (userId) => {
         setSelectedUser(usersData[userId]);
@@ -162,25 +164,29 @@ export default function MeusEventos() {
                         <View style={styles.modalContent}>
                             <Text style={styles.title}>Candidatos</Text>
                             {candidaturas.length > 0 ? (
-                                <FlatList
-                                    data={candidaturas}
-                                    keyExtractor={(item) => item.id}
-                                    renderItem={({ item }) => {
-                                        const candidato = usersData[item.userId];
-                                        if (candidato) {
-                                            return (
-                                                <TouchableOpacity style={styles.cardCandidato} onPress={() => openUserModal(item.userId)}>
-                                                    <Text style={styles.nomeCandidato}>{candidato.username}</Text>
-                                                    {/* Adicione outras informações conforme necessário */}
-                                                </TouchableOpacity>
-                                            );
-                                        } else {
-                                            return null; // ou renderize algum placeholder
-                                        }
-                                    }} />
-                            ) : (
-                                <Text>Nenhuma candidatura encontrada para este evento.</Text>
-                            )}
+    <FlatList
+        data={candidaturas}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => {
+            if (item.userId) {
+                const candidato = usersData[item.userId];
+                if (candidato) {
+                    return (
+                        <TouchableOpacity style={styles.cardCandidato} onPress={() => openUserModal(item.userId)}>
+                            <Text style={styles.nomeCandidato}>{candidato.username}</Text>
+                        </TouchableOpacity>
+                    );
+                } else {
+                    return null; 
+                }
+            } else {
+                console.log('userId não definido para o item:', item);
+                return null;
+            }
+        }} />
+) : (
+    <Text>Nenhuma candidatura encontrada para este evento.</Text>
+)}
                         </View>
                     )}
                     <TouchableOpacity style={styles.button} onPress={closeModal}>
@@ -229,11 +235,18 @@ export default function MeusEventos() {
                             </ScrollView>
                             <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
                             <TouchableOpacity
-                                style={styles.contratar}
-                                onPress={() => contratar(selectedUser, selectedEvent)}
-                            >
-                                <Text style={styles.textStyle}>Contratar</Text>
-                            </TouchableOpacity>
+    style={styles.contratar}
+    onPress={() => {
+        if (selectedUser && selectedEvent) {
+            diminuirVaga(selectedUser, selectedEvent);
+        } else {
+            console.error("Usuário ou evento não selecionado.");
+        }
+    }}
+>
+    <Text style={styles.textStyle}>Contratar</Text>
+</TouchableOpacity>
+
                             <TouchableOpacity
                                 style={styles.contratar}
                                 

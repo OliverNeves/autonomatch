@@ -2,36 +2,54 @@ import { getDatabase, ref, get, update} from "firebase/database";
 import { pegarToken } from "../pages/Login";
 import messaging from '@react-native-firebase/messaging'
 
-export const contratar = async (selectedUser, selectedEvent) => {
-  const terceirizadoId = selectedUser.id;
-  const eventId = selectedEvent.id
-    try {
-      
-      const token = await pegarToken(terceirizadoId); 
+
+  // export const contratar = async (selectedUser, selectedEvent) => {
+  //   try {
+  //     if (!selectedUser || !selectedEvent) {
+  //       throw new Error('Usuário ou evento inválido.');
+  //     }
+  
+  //     const terceirizadoId = selectedUser && selectedUser.id;
+  //     const eventId = selectedEvent && selectedEvent.id;
+
   
       
-      await sendNotification(token, 'Você foi contratado!');
+  //     const token = await pegarToken(terceirizadoId); 
   
-      console.log('Terceirizado contratado e notificado com sucesso.');
+      
+  //     // await sendNotification(token, 'Você foi contratado!');
   
-      // Diminua a vaga apropriada
-      await diminuirVaga(terceirizadoId, eventId);
+  //     console.log('Terceirizado contratado e notificado com sucesso.');
   
-    } catch (error) {
-      console.error('Erro ao contratar e notificar o terceirizado:', error);
-    }
-  };
+  //     // Diminua a vaga apropriada
+  //     await diminuirVaga(selectedUser, selectedEvent);
+  
+  //   } catch (error) {
+  //     console.error('Erro ao contratar e notificar o terceirizado:', error);
+  //   }
+  // };
   
 
-const diminuirVaga = async (userId, eventId) => {
+  export const diminuirVaga = async (selectedUser, selectedEvent) => {
+    if (!selectedUser || !selectedEvent) {
+        throw new Error('Usuário ou evento inválido.');
+    }
     const db = getDatabase();
-  
+    const userId = selectedUser ? selectedUser.id : null;
+    const eventId = selectedEvent ? selectedEvent.id : null;
+
+
     // Buscar a especialidade do usuário
     const userRef = ref(db, `users/${userId}`);
     const userSnapshot = await get(userRef);
     const user = userSnapshot.val();
+
+    if (!user) {
+        throw new Error(`Usuário com id ${userId} não encontrado.`);
+    }
+
     const especialidade = user.especialidade;
-  
+
     // Mapear a especialidade do usuário para a contagem de vagas correspondente
     const especialidadeParaVaga = {
       'cozinheiro': 'cozinheiroCount',
@@ -40,12 +58,16 @@ const diminuirVaga = async (userId, eventId) => {
       'sgerais': 'servicosGeraisCount',
     };
     const vaga = especialidadeParaVaga[especialidade];
-  
+
     // Buscar o evento
     const eventRef = ref(db, `eventos/${eventId}`);
     const eventSnapshot = await get(eventRef);
     const event = eventSnapshot.val();
-  
+
+    if (!event) {
+        throw new Error(`Evento com id ${eventId} não encontrado.`);
+    }
+
     // Verificar se a especialidade do usuário corresponde a uma das vagas do evento
     if (event[vaga] > 0) {
       // Diminuir a contagem da vaga apropriada
@@ -53,13 +75,14 @@ const diminuirVaga = async (userId, eventId) => {
         ...event,
         [vaga]: event[vaga] - 1,
       };
-  
+
       // Atualizar o evento no banco de dados
       await update(eventRef, updatedEvent);
     } else {
       throw new Error(`Não há vagas disponíveis para ${especialidade}.`);
     }
-  };
+};
+
   
   export const sendNotification = async (token, message) => {
     try {

@@ -14,9 +14,11 @@ import { realizarLogin } from "../../contexts/auth";
 
 export async function pegarToken(usuario) {
   try {
-    const token = await messaging().getToken();
     const db = getDatabase();
-    const userRef = ref(db, 'users/' + usuario.uid);
+    const user = auth.currentUser;
+    const userId = user.uid;
+    const token = await messaging().getToken();
+    const userRef = ref(db, 'users/' + userId);
     await update(userRef, { fcmToken: token });
 
     console.log('Token do Dispositivo Armazenado:', token);
