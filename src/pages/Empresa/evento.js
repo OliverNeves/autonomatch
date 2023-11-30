@@ -137,11 +137,11 @@ export default function Eventos() {
                             <View style={styles.vagas}>
                             <Text style={styles.titulo}>Auxiliar de Cozinha:</Text>
                                 <TouchableOpacity onPress={() => decremento(setAuxiliarCount)}>
-                                    <Icon name="minus-circle" size={20} color="black" style={{left: 110}}/>
+                                    <Icon name="minus-circle" size={20} color="black" style={{left: 120}}/>
                                 </TouchableOpacity>
-                                <Text style={{fontSize: 18, color: '#121212', left: 125}}>{auxiliarCount}</Text>
+                                <Text style={{fontSize: 18, color: '#121212', left: 135}}>{auxiliarCount}</Text>
                                 <TouchableOpacity onPress={() => incremento(setAuxiliarCount)}>
-                                    <Icon name="plus-circle" size={20} color="black" style={{left: 140}}/>
+                                    <Icon name="plus-circle" size={20} color="black" style={{left: 150}}/>
                                 </TouchableOpacity>
                             </View>
 
@@ -149,11 +149,11 @@ export default function Eventos() {
                             <View style={styles.vagas}>
                             <Text style={styles.titulo}>Garçom / Garçonete:</Text>
                                 <TouchableOpacity onPress={() => decremento(setGarcomCount)}>
-                                    <Icon name="minus-circle" size={20} color="black" style={{left: 100}} />
+                                    <Icon name="minus-circle" size={20} color="black" style={{left: 110}} />
                                 </TouchableOpacity>
-                                <Text style={{ fontSize: 18, color: '#121212', left: 115 }}>{garcomCount}</Text>
+                                <Text style={{ fontSize: 18, color: '#121212', left: 125 }}>{garcomCount}</Text>
                                 <TouchableOpacity onPress={() => incremento(setGarcomCount)}>
-                                    <Icon name="plus-circle" size={20} color="black" style={{left: 130}}/>
+                                    <Icon name="plus-circle" size={20} color="black" style={{left: 140}}/>
                                 </TouchableOpacity>
                             </View>
 
@@ -161,11 +161,11 @@ export default function Eventos() {
                             <View style={styles.vagas}>
                             <Text style={styles.titulo}>Serviços Gerais:</Text>
                                 <TouchableOpacity onPress={() => decremento(setServicosGeraisCount)}>
-                                    <Icon name="minus-circle" size={20} color="black" style={{left: 140}}/>
+                                    <Icon name="minus-circle" size={20} color="black" style={{left: 150}}/>
                                 </TouchableOpacity>
-                                <Text style={{ fontSize: 18, color: '#121212', left: 155 }}>{servicosGeraisCount}</Text>
+                                <Text style={{ fontSize: 18, color: '#121212', left: 165 }}>{servicosGeraisCount}</Text>
                                 <TouchableOpacity onPress={() => incremento(setServicosGeraisCount)}>
-                                    <Icon name="plus-circle" size={20} color="black" style={{left: 170}}/>
+                                    <Icon name="plus-circle" size={20} color="black" style={{left: 180}}/>
                                 </TouchableOpacity>
                             </View>
 
