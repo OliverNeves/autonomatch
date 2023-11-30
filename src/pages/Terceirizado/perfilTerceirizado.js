@@ -93,8 +93,8 @@ export default function PerfilTerceirizado() {
                       userData.especialidade
             }</Text>
             <Text style={styles.dados}>Experiência: </Text>
-            <ScrollView style={{ borderColor: '#5B8BDF', borderWidth: 2, width: '100%', height: 240, padding: 10, marginTop: 10 }}>
-              <Text style={styles.dados}>{userData.experiencia}</Text>
+            <ScrollView style={{ borderColor: '#121212', borderWidth: 2, width: '100%', height: 240, padding: 10, marginTop: 10, backgroundColor: 'white' }}>
+              <Text style={styles.xp}>{userData.experiencia}</Text>
             </ScrollView>
           </View>
         </>
@@ -195,4 +195,9 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     marginTop: 40
   },
+  xp:{
+    color: "#469CAC",
+    fontWeight: 'bold',
+    fontSize: 18
+  }
 });

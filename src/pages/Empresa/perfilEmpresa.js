@@ -117,9 +117,10 @@ export default function PerfilEmpresa() {
                 height: 240,
                 padding: 10,
                 marginTop: 10,
+                backgroundColor: 'white'
               }}
             >
-              <Text style={styles.dados}>{userData.experiencia}</Text>
+              <Text style={styles.xp}>{userData.experiencia}</Text>
             </View>
           </View>
         </>
@@ -241,4 +242,9 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     marginTop: 40
   },
+  xp:{
+    color: "#469CAC",
+    fontWeight: 'bold',
+    fontSize: 20
+  }
 });

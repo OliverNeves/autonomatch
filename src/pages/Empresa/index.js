@@ -151,7 +151,7 @@ export default function HomeEmpresa({ navigation }) {
                                     setSelectedUser(null);
                                 }}
                             >
-                                <Text style={styles.textStyle}>Contratar</Text>
+                                <Text style={styles.textStyle}>Convidar</Text>
                             </TouchableOpacity>
                         </View>
 

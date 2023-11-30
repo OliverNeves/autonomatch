@@ -5,9 +5,9 @@ import { Background, Container } from '../Login/styles';
 export default function MensagemEmpresa(){
     return(
         <Background>
-            <Container>
-                
-            </Container>
+           
+                <Text>Propostas</Text>
+            
         </Background>
     )
 }

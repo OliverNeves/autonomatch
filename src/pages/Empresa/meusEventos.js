@@ -145,6 +145,10 @@ export default function MeusEventos() {
                                     {item.nomeEvento && (
                                         <Text style={styles.cardTitle}>{item.nomeEvento}</Text>
                                     )}
+                                    <Text style={styles.cardTitle}>{item.data}</Text>
+                                    <TouchableOpacity onPress={() => excluirCandidatura(item.eventId)}>
+                                        <FontAwesome name="trash" size={24} color="red" />
+                                    </TouchableOpacity>
                                 </Card.Content>
                             </Card>
                         </TouchableOpacity>
@@ -360,4 +364,8 @@ const styles = StyleSheet.create({
         right: 10,
         zIndex: 1,
     },
+    cardContent:{
+        flexDirection: 'row',
+        justifyContent: 'space-between'
+    }
 });

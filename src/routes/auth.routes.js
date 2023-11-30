@@ -16,8 +16,9 @@ import PerfilTerceirizado from '../pages/Terceirizado/perfilTerceirizado';
 import FormEmpresa from '../pages/Empresa/formEmpresa';
 import FormTerceirizado from '../pages/Terceirizado/formTerceirizado';
 import MeusEventos from '../pages/Empresa/meusEventos';
-import { transparent } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
-
+import Proposta from '../pages/Terceirizado/propostas';
+import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import AntDesign from 'react-native-vector-icons/AntDesign'
 
 const AuthStack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -40,22 +41,22 @@ function RotaEmpresa(){
             }}
             />
             <Tab.Screen
-            name='Mensagem'
-            component={MensagemEmpresa}
-            options={{
-                tabBarLabel: "MENSAGEM",
-                tabBarIcon: ({color, size}) =>{
-                    return <Feather name="message-square" color={color} size={size}/>
-                }
-            }}
-            />
-            <Tab.Screen
             name='MeusEventos'
             component={MeusEventos}
             options={{
                 tabBarLabel: "Eventos",
                 tabBarIcon: ({color, size}) =>{
                     return <MaterialIcons name="event-available" color={color} size={size}/>
+                }
+            }}
+            />
+            <Tab.Screen
+            name='Mensagem'
+            component={MensagemEmpresa}
+            options={{
+                tabBarLabel: "PROPOSTA",
+                tabBarIcon: ({color, size}) =>{
+                    return <FontAwesome name="handshake-o" color={color} size={size}/>
                 }
             }}
             />
@@ -94,9 +95,20 @@ function RotaTerceirizado(){
             component={MensagemTerceirizado}
             options={{
                 headerShown: false,
-                tabBarLabel: "MENSAGEM",
+                tabBarLabel: "CANDIDATURAS",
                 tabBarIcon: ({color, size}) =>{
-                    return <Feather name="message-square" color={color} size={size}/>
+                    return <AntDesign name="solution1" color={color} size={size}/>
+                }
+            }}
+            />
+            <Tab.Screen
+            name='Proposta'
+            component={Proposta}
+            options={{
+                headerShown: false,
+                tabBarLabel: "PROPOSTA",
+                tabBarIcon: ({color, size}) =>{
+                    return <FontAwesome name="handshake-o" color={color} size={size}/>
                 }
             }}
             />

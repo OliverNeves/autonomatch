@@ -30,7 +30,6 @@ export default function HomeTerceirizado({ navigation }) {
             const usuarioCandidaturasRef = ref(db, `users/${auth.currentUser.uid}/candidaturas`);
             const novaCandidaturaRef = push(usuarioCandidaturasRef);
     
-            // Adicionando a referência do evento à candidatura
             await set(novaCandidaturaRef, {
                 eventId: selectedEvent.eventId,
                 nomeEvento: selectedEvent.nomeEvento,
@@ -106,6 +105,7 @@ export default function HomeTerceirizado({ navigation }) {
                     value={searchQuery}
                     style={styles.searchbar}
                     icon={() => <Icon name="search" size={40} color="#121212" style={{ right: 8 }} />}
+                    clearIcon={() => <Feather name="x" size={25}/>}
                 />
                 <TouchableOpacity onPress={() => setModalVisible(true)}>
                     <Feather name="filter" size={20} color="#000" style={styles.filterIcon} />
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     texto: {
         flex: 1,
         textAlign: 'center',
-        fontSize: 20,
+        fontSize: 25,
         color: 'white',
     },
     button: {
