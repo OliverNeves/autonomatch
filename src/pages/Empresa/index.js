@@ -12,10 +12,11 @@ import {Background} from '../Login/styles';
 import Feather from 'react-native-vector-icons/Feather';
 import {deslogar} from '../../contexts/auth';
 import Icon from 'react-native-vector-icons/EvilIcons';
-import {getDatabase, ref, onValue} from 'firebase/database';
+import {getDatabase, ref, onValue, get} from 'firebase/database';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {Picker} from '@react-native-picker/picker';
 import {abrirWhatsApp} from './perfilEmpresa';
+import { auth } from '../../contexts/firebaseConfig';
 
 export default function HomeEmpresa({navigation}) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,11 +24,30 @@ export default function HomeEmpresa({navigation}) {
   const [funcionarios, setFuncionarios] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedFunction, setSelectedFunction] = useState('');
+  const [currentUserEvents, setCurrentUserEvents] = useState([]);
+  const [modalVisibleEvents, setModalVisibleEvents] = useState(false);
 
-  // Substitua isso pela lógica para buscar os usuários do banco de dados
+    const db = getDatabase();
+    const currentUser = auth.currentUser;
+
+    const abrirModalEventos = async () => {
+        const userEventsRef = ref(db, `eventos/${currentUser.uid}`);
+        const snapshot = await get(userEventsRef);
+        
+        if (snapshot.exists()) {
+          setCurrentUserEvents(Object.values(snapshot.val()));
+          // Abre o modal de eventos
+          setModalVisibleEvents(true);
+        } else {
+          // Não há eventos para exibir
+          console.log("O usuário atual não criou nenhum evento.");
+        }
+      };
+
+ 
   const buscarFuncionariosTerceirizados = setFuncionarios => {
     const db = getDatabase();
-    const terceirizadosRef = ref(db, 'users'); // Substitua 'usuarios' pelo caminho real no seu banco de dados
+    const terceirizadosRef = ref(db, 'users'); 
 
     onValue(terceirizadosRef, snapshot => {
       const data = snapshot.val();
@@ -53,7 +73,7 @@ export default function HomeEmpresa({navigation}) {
   };
 
   useEffect(() => {
-    buscarFuncionariosTerceirizados(setFuncionarios); // Substitua setFuncionarios pela função que atualiza o estado dos funcionários
+    buscarFuncionariosTerceirizados(setFuncionarios); 
   }, []);
 
   return (
@@ -180,13 +200,12 @@ export default function HomeEmpresa({navigation}) {
                 <Text style={styles.xp}>{selectedUser.experiencia}</Text>
               </ScrollView>
               <TouchableOpacity
-                style={styles.contratar}
-                onPress={() => {
-                  // Adicione aqui a lógica para se candidatar ao evento
-                  setSelectedUser(null);
-                }}>
-                <Text style={styles.textStyle}>Convidar</Text>
-              </TouchableOpacity>
+  style={styles.contratar}
+  onPress={() => {
+    abrirModalEventos();
+  }}>
+  <Text style={styles.textStyle}>Convidar</Text>
+</TouchableOpacity>
             </View>
           </Background>
         )}
@@ -216,6 +235,41 @@ export default function HomeEmpresa({navigation}) {
               style={{...styles.openButton, backgroundColor: '#121212'}}
               onPress={() => {
                 setModalVisible(!modalVisible);
+              }}>
+              <Text style={styles.textStyle}>Fechar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={modalVisibleEvents}
+        onRequestClose={() => {
+          setModalVisibleEvents(false);
+        }}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.dados}>Seus Eventos</Text>
+            <FlatList
+  data={currentUserEvents}
+  keyExtractor={(item) => item.eventId}
+  renderItem={({ item }) => (
+    <Card>
+      <Card.Content style={styles.cardModal}>
+        <Text style={{color: '#121212', fontSize: 20}}>
+           {item.nomeEvento}
+        </Text>
+        <Text style={{color: '#121212', fontSize: 20}}>Data: {item.data}</Text>
+      </Card.Content>
+    </Card>
+  )}
+/>
+
+            <TouchableOpacity
+              style={{ ...styles.openButton, backgroundColor: '#121212' }}
+              onPress={() => {
+                setModalVisibleEvents(false);
               }}>
               <Text style={styles.textStyle}>Fechar</Text>
             </TouchableOpacity>
@@ -344,4 +398,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 20,
   },
+  cardModal:{
+    flexDirection: 'row'
+  }
 });

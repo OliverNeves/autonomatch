@@ -85,6 +85,7 @@ const styles = StyleSheet.create({
         fontSize: 25,
         alignSelf: 'center',
         padding: 15,
+        
   },
   card: {
     backgroundColor: '#fff',
@@ -94,6 +95,7 @@ const styles = StyleSheet.create({
   candidaturaText: {
     fontSize: 16,
     color: 'black',
+    fontWeight: 'bold'
   },
   content:{
     flexDirection: 'row',

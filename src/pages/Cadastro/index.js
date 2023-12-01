@@ -70,7 +70,7 @@ export default function Cadastro(){
                         color="white"
                         />
                     <RadioButton.Item 
-                        label="Terceirizado" 
+                        label="Autônomo" 
                         value="terceirizado" 
                         labelStyle={{ color: 'white' }} 
                         color="white"
