@@ -223,12 +223,12 @@ export default function MeusEventos() {
             </View>
             <View style={styles.dadosContainer}>
               <Text style={styles.dados}>Nome: {selectedUser.username}</Text>
-              <TouchableOpacity onPress={abrirWhatsApp(selectedUser.telefone)}>
-                <Text style={styles.dados}>
-                  Telefone: {selectedUser.telefone}{' '}
-                  <FontAwesome name="whatsapp" color="green" size={23} />
-                </Text>
-              </TouchableOpacity>
+              <TouchableOpacity onPress={() => abrirWhatsApp(selectedUser.telefone)}>
+  <Text style={styles.dados}>
+    Telefone: {selectedUser.telefone}{' '}
+    <FontAwesome name="whatsapp" color="green" size={23} />
+  </Text>
+</TouchableOpacity>
               <Text style={styles.dados}>Email: {selectedUser.email}</Text>
               <Text style={styles.dados}>
                 Data de Nascimento: {selectedUser.dtNasc}

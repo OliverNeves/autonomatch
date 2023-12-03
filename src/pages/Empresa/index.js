@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -7,18 +7,17 @@ import {
   FlatList,
   ScrollView,
 } from 'react-native';
-import {Text, Searchbar, Card} from 'react-native-paper';
-import {Background} from '../Login/styles';
+import { Text, Searchbar, Card } from 'react-native-paper';
+import { Background } from '../Login/styles';
 import Feather from 'react-native-vector-icons/Feather';
-import {deslogar} from '../../contexts/auth';
 import Icon from 'react-native-vector-icons/EvilIcons';
-import {getDatabase, ref, onValue, get} from 'firebase/database';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {Picker} from '@react-native-picker/picker';
-import {abrirWhatsApp} from './perfilEmpresa';
+import { Picker } from '@react-native-picker/picker';
+import { abrirWhatsApp } from './perfilEmpresa';
+import { getDatabase, ref, onValue, get, push } from 'firebase/database';
 import { auth } from '../../contexts/firebaseConfig';
 
-export default function HomeEmpresa({navigation}) {
+export default function HomeEmpresa({ navigation }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [funcionarios, setFuncionarios] = useState([]);
@@ -26,28 +25,27 @@ export default function HomeEmpresa({navigation}) {
   const [selectedFunction, setSelectedFunction] = useState('');
   const [currentUserEvents, setCurrentUserEvents] = useState([]);
   const [modalVisibleEvents, setModalVisibleEvents] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
-    const db = getDatabase();
-    const currentUser = auth.currentUser;
+  const db = getDatabase();
+  const currentUser = auth.currentUser;
 
-    const abrirModalEventos = async () => {
-        const userEventsRef = ref(db, `eventos/${currentUser.uid}`);
-        const snapshot = await get(userEventsRef);
-        
-        if (snapshot.exists()) {
-          setCurrentUserEvents(Object.values(snapshot.val()));
-          // Abre o modal de eventos
-          setModalVisibleEvents(true);
-        } else {
-          // Não há eventos para exibir
-          console.log("O usuário atual não criou nenhum evento.");
-        }
-      };
+  const abrirModalEventos = async () => {
+    const userEventsRef = ref(db, `eventos/${currentUser.uid}`);
+    const snapshot = await get(userEventsRef);
 
- 
+    if (snapshot.exists()) {
+      setCurrentUserEvents(Object.values(snapshot.val()));
+      // Abre o modal de eventos
+      setModalVisibleEvents(true);
+    } else {
+      // Não há eventos para exibir
+      console.log("O usuário atual não criou nenhum evento.");
+    }
+  };
+
   const buscarFuncionariosTerceirizados = setFuncionarios => {
-    const db = getDatabase();
-    const terceirizadosRef = ref(db, 'users'); 
+    const terceirizadosRef = ref(db, 'users');
 
     onValue(terceirizadosRef, snapshot => {
       const data = snapshot.val();
@@ -73,8 +71,30 @@ export default function HomeEmpresa({navigation}) {
   };
 
   useEffect(() => {
-    buscarFuncionariosTerceirizados(setFuncionarios); 
+    buscarFuncionariosTerceirizados(setFuncionarios);
   }, []);
+
+  const enviarProposta = (evento, terceirizado) => {
+    const propostasRef = ref(db, 'propostas'); // Substitua 'propostas' pelo caminho real no seu banco de dados
+
+    const novaProposta = {
+      idEvento: evento.eventId,
+      nomeEvento: evento.nomeEvento,
+      idTerceirizado: terceirizado.id,
+      nomeTerceirizado: terceirizado.nome,
+      especialidadeTerceirizado: terceirizado.especialidade,
+      // Adicione outros campos conforme necessário
+    };
+
+    // Salve a nova proposta no banco de dados
+    push(propostasRef, novaProposta)
+      .then(() => {
+        console.log('Proposta salva com sucesso!');
+      })
+      .catch((error) => {
+        console.error('Erro ao salvar proposta:', error);
+      });
+  };
 
   return (
     <Background>
@@ -100,7 +120,7 @@ export default function HomeEmpresa({navigation}) {
           value={searchQuery}
           style={styles.searchbar}
           icon={() => (
-            <Icon name="search" size={40} color="#121212" style={{right: 8}} />
+            <Icon name="search" size={40} color="#121212" style={{ right: 8 }} />
           )}
           clearIcon={() => <Feather name="x" color="#121212" size={30} />}
         />
@@ -122,7 +142,7 @@ export default function HomeEmpresa({navigation}) {
             item.nome.toLowerCase().includes(searchQuery.toLowerCase()),
         )}
         keyExtractor={item => item.id}
-        renderItem={({item}) => (
+        renderItem={({ item }) => (
           <Card style={styles.card} onPress={() => setSelectedUser(item)}>
             <Card.Content style={styles.cardContent}>
               <Text style={styles.cardTitle}>{item.nome}</Text>
@@ -130,12 +150,12 @@ export default function HomeEmpresa({navigation}) {
                 {item.especialidade === 'cozinheiro'
                   ? 'Cozinheiro(a)'
                   : item.especialidade === 'auxiliar'
-                  ? 'Auxiliar de Cozinha'
-                  : item.especialidade === 'garcom'
-                  ? 'Garçom / Garçonete'
-                  : item.especialidade === 'sgerais'
-                  ? 'Serviços Gerais'
-                  : item.especialidade}
+                    ? 'Auxiliar de Cozinha'
+                    : item.especialidade === 'garcom'
+                      ? 'Garçom / Garçonete'
+                      : item.especialidade === 'sgerais'
+                        ? 'Serviços Gerais'
+                        : item.especialidade}
               </Text>
               {/* Adicione outros campos conforme necessário */}
             </Card.Content>
@@ -164,7 +184,7 @@ export default function HomeEmpresa({navigation}) {
             </View>
             <View style={styles.dadosContainer}>
               <Text style={styles.dados}>Nome: {selectedUser.nome}</Text>
-              <TouchableOpacity onPress={abrirWhatsApp(selectedUser.telefone)}>
+              <TouchableOpacity onPress={() => abrirWhatsApp(selectedUser.telefone)}>
                 <Text style={styles.dados}>
                   Telefone: {selectedUser.telefone}{' '}
                   <FontAwesome name="whatsapp" color="green" size={23} />
@@ -179,12 +199,12 @@ export default function HomeEmpresa({navigation}) {
                 {selectedUser.especialidade === 'cozinheiro'
                   ? 'Cozinheiro(a)'
                   : selectedUser.especialidade === 'auxiliar'
-                  ? 'Auxiliar de Cozinha'
-                  : selectedUser.especialidade === 'garcom'
-                  ? 'Garçom / Garçonete'
-                  : selectedUser.especialidade === 'sgerais'
-                  ? 'Serviços Gerais'
-                  : selectedUser.especialidade}
+                    ? 'Auxiliar de Cozinha'
+                    : selectedUser.especialidade === 'garcom'
+                      ? 'Garçom / Garçonete'
+                      : selectedUser.especialidade === 'sgerais'
+                        ? 'Serviços Gerais'
+                        : selectedUser.especialidade}
               </Text>
               <Text style={styles.dados}>Experiência: </Text>
               <ScrollView
@@ -200,12 +220,12 @@ export default function HomeEmpresa({navigation}) {
                 <Text style={styles.xp}>{selectedUser.experiencia}</Text>
               </ScrollView>
               <TouchableOpacity
-  style={styles.contratar}
-  onPress={() => {
-    abrirModalEventos();
-  }}>
-  <Text style={styles.textStyle}>Convidar</Text>
-</TouchableOpacity>
+                style={styles.contratar}
+                onPress={() => {
+                  abrirModalEventos();
+                }}>
+                <Text style={styles.textStyle}>Convidar</Text>
+              </TouchableOpacity>
             </View>
           </Background>
         )}
@@ -221,7 +241,7 @@ export default function HomeEmpresa({navigation}) {
           <View style={styles.modalView}>
             <Picker
               selectedValue={selectedFunction}
-              style={{height: 50, width: 150}}
+              style={{ height: 50, width: 150 }}
               onValueChange={(itemValue, itemIndex) =>
                 setSelectedFunction(itemValue)
               }>
@@ -232,7 +252,7 @@ export default function HomeEmpresa({navigation}) {
               <Picker.Item label="Serviços Gerais" value="sgerais" />
             </Picker>
             <TouchableOpacity
-              style={{...styles.openButton, backgroundColor: '#121212'}}
+              style={{ ...styles.openButton, backgroundColor: '#121212' }}
               onPress={() => {
                 setModalVisible(!modalVisible);
               }}>
@@ -252,19 +272,27 @@ export default function HomeEmpresa({navigation}) {
           <View style={styles.modalView}>
             <Text style={styles.dados}>Seus Eventos</Text>
             <FlatList
-  data={currentUserEvents}
-  keyExtractor={(item) => item.eventId}
-  renderItem={({ item }) => (
-    <Card>
-      <Card.Content style={styles.cardModal}>
-        <Text style={{color: '#121212', fontSize: 20}}>
-           {item.nomeEvento}
-        </Text>
-        <Text style={{color: '#121212', fontSize: 20}}>Data: {item.data}</Text>
-      </Card.Content>
-    </Card>
-  )}
-/>
+              data={currentUserEvents}
+              keyExtractor={(item) => item.eventId}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+      onPress={() => {
+        setSelectedEvent(item);
+        setSelectedUser(selectedUser); // Certifique-se de incluir o usuário selecionado
+        enviarProposta(item, selectedUser);
+      }}
+    >
+      <Card>
+        <Card.Content style={styles.cardModal}>
+          <Text style={{ color: '#121212', fontSize: 20 }}>
+            {item.nomeEvento}
+          </Text>
+          <Text style={{ color: '#121212', fontSize: 20 }}>Data: {item.data}</Text>
+        </Card.Content>
+      </Card>
+    </TouchableOpacity>
+              )}
+            />
 
             <TouchableOpacity
               style={{ ...styles.openButton, backgroundColor: '#121212' }}
