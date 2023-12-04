@@ -31,6 +31,7 @@ export default function HomeTerceirizado({ navigation }) {
             const novaCandidaturaRef = push(usuarioCandidaturasRef);
     
             await set(novaCandidaturaRef, {
+                userId: auth.currentUser.uid,
                 eventId: selectedEvent.eventId,
                 nomeEvento: selectedEvent.nomeEvento,
                 data: selectedEvent.data,

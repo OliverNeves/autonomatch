@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import { Background, Container, SubmitText } from '../Login/styles';
-import { Formik } from 'formik';
+import { Formik, resetForm } from 'formik';
 import * as Yup from 'yup';
-import { getDatabase, ref, set, push } from 'firebase/database';
+import { getDatabase, ref, set, push, get } from 'firebase/database';
 import { auth } from '../../contexts/firebaseConfig';
 import Icon from 'react-native-vector-icons/FontAwesome'
 
@@ -16,11 +16,24 @@ const validationSchema = Yup.object().shape({
     horario: Yup.string().required('Horário é obrigatório'),
 });
 
+
 export default function Eventos() {
     const [cozinheiroCount, setCozinheiroCount] = useState(0);
     const [auxiliarCount, setAuxiliarCount] = useState(0);
     const [garcomCount, setGarcomCount] = useState(0);
     const [servicosGeraisCount, setServicosGeraisCount] = useState(0);
+    const [modalVisible, setModalVisible] = useState(true);
+
+    const resetFormAndCounts = (props) => {
+        props.resetForm(); // Clear the form fields
+      
+        // Reset the counts
+        setCozinheiroCount(0);
+        setAuxiliarCount(0);
+        setGarcomCount(0);
+        setServicosGeraisCount(0);
+      };
+
 
     const incremento = (setter) => {
         setter((prevCount) => prevCount + 1);
@@ -41,7 +54,11 @@ export default function Eventos() {
           // Generate a unique event ID
           const eventId = push(eventosRef).key;
       
-          // Add the number of employees for each category
+          // Fetch user data (including username)
+          const userSnapshot = await get(ref(db, `users/${userId}`));
+          const userData = userSnapshot.val();
+          
+          // Add the number of employees for each category and user's name
           const eventoCompleto = {
             ...eventoData,
             eventId,
@@ -49,6 +66,7 @@ export default function Eventos() {
             auxiliarCount,
             garcomCount,
             servicosGeraisCount,
+            nomeUsuario: userData.username, // Assuming your user data has a field named 'username'
           };
       
           // Save the event data to the database
@@ -59,6 +77,7 @@ export default function Eventos() {
           console.error('Erro ao salvar dados do evento:', error);
         }
       };
+      
 
     return (
         <Background>
@@ -71,9 +90,11 @@ export default function Eventos() {
                     data: '',
                 }}
                 validationSchema={validationSchema}
-                onSubmit={(values) => {
+                onSubmit={(values, { setSubmitting, resetForm }) => {
                     salvarDados(values);
-                }}
+                    resetFormAndCounts({ resetForm });
+                    setSubmitting(false);
+                  }}
             >
                 {(props) => (
                     <Container>
@@ -91,7 +112,7 @@ export default function Eventos() {
                         <TextInput
                             label="Data"
                             style={styles.input}
-                            placeholder='dd/mm/aa'
+                            placeholder='dd/mm/aaaa'
                             keyboardType='numeric'
                             onChangeText={(text) => {
                                 const formattedText = text
@@ -169,11 +190,15 @@ export default function Eventos() {
                                 </TouchableOpacity>
                             </View>
 
-                            <TouchableOpacity style={styles.enviar} onPress={props.handleSubmit}>
-                                <Text style={styles.textButton}>
-                                    Criar Evento
-                                </Text>
-                            </TouchableOpacity>
+                            <TouchableOpacity
+        style={styles.enviar}
+        onPress={() => {
+          props.handleSubmit();
+          resetFormAndCounts(props);
+        }}
+      >
+        <Text style={styles.textButton}>Criar Evento</Text>
+      </TouchableOpacity>
                         </View>
 
                     </Container>

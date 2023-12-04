@@ -31,22 +31,23 @@ import messaging from '@react-native-firebase/messaging'
   
 
   export const diminuirVaga = async (selectedUser, selectedEvent) => {
+    // Obtenha as IDs do usuário e do evento
+    const userUid = selectedUser ? selectedUser.userId : null;
+    const nomeEvento = selectedEvent ? selectedEvent.nomeEvento : null;
+  
+    // Verifique se as IDs estão definidas
     
-    if (!selectedUser || !selectedEvent) {
-        throw new Error('Usuário ou evento inválido.');
-    }
+  
     const db = getDatabase();
-    const userId = selectedUser ? selectedUser.id : null;
-    const eventId = selectedEvent ? selectedEvent.id : null;
-
-
+  
     // Buscar a especialidade do usuário
-    const userRef = ref(db, `users/${userId}`);
+    const userRef = ref(db, `users/${userUid}`);
     const userSnapshot = await get(userRef);
     const user = userSnapshot.val();
 
+
     if (!user) {
-        throw new Error(`Usuário com id ${userId} não encontrado.`);
+        throw new Error(`Usuário com id ${userUid} não encontrado.`);
     }
 
     const especialidade = user.especialidade;
@@ -61,13 +62,11 @@ import messaging from '@react-native-firebase/messaging'
     const vaga = especialidadeParaVaga[especialidade];
 
     // Buscar o evento
-    const eventRef = ref(db, `eventos/${eventId}`);
+    const eventRef = ref(db, `eventos/${userUid}/${nomeEvento}`);
     const eventSnapshot = await get(eventRef);
     const event = eventSnapshot.val();
 
-    if (!event) {
-        throw new Error(`Evento com id ${eventId} não encontrado.`);
-    }
+    
 
     // Verificar se a especialidade do usuário corresponde a uma das vagas do evento
     if (event[vaga] > 0) {

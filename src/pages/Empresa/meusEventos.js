@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {Card, Text} from 'react-native-paper';
 import {Background} from '../Login/styles';
-import {getDatabase, ref, get} from 'firebase/database';
+import {getDatabase, ref, get, remove} from 'firebase/database';
 import {auth} from '../../contexts/firebaseConfig';
 import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -25,8 +25,27 @@ export default function MeusEventos() {
   const [userModalVisible, setUserModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
-  const openUserModal = userId => {
-    setSelectedUser(usersData[userId]);
+  const excluirEvento = async eventId => {
+    try {
+      const user = auth.currentUser;
+      const userId = user.uid;
+      const db = getDatabase();
+
+      const eventoRef = ref(db, `eventos/${userId}/${eventId}`);
+
+      await remove(eventoRef);
+
+      console.log('Evento excluído com sucesso!');
+
+      const novosEventos = eventos.filter(evento => evento.eventId !== eventId);
+      setEventos(novosEventos);
+    } catch (error) {
+      console.error('Erro ao excluir evento:', error);
+    }
+  };
+
+  const openUserModal = user => {
+    setSelectedUser(user);
     setUserModalVisible(true);
   };
 
@@ -35,9 +54,9 @@ export default function MeusEventos() {
     setUserModalVisible(false);
   };
 
-  const openModal = async event => {
+  const openModal = event => {
     setSelectedEvent(event);
-    await buscarCandidaturas(event.eventId);
+    buscarCandidaturas(event.eventId);
     setModalVisible(true);
   };
 
@@ -77,9 +96,7 @@ export default function MeusEventos() {
       const eventos = eventosSnapshot.val();
 
       if (eventos) {
-        const eventosArray = Object.values(eventos).filter(
-          evento => evento && evento.nomeEvento,
-        );
+        const eventosArray = Object.values(eventos).map(evento => evento);
         setEventos(eventosArray);
       } else {
         setEventos([]);
@@ -105,8 +122,8 @@ export default function MeusEventos() {
             for (let candidaturaId in user.candidaturas) {
               const candidatura = user.candidaturas[candidaturaId];
               if (candidatura.eventId === eventId) {
-                // Adicione o userId à candidatura para que possamos usá-lo mais tarde
                 candidatura.userId = userId;
+                console.log('userId atribuído:', userId);
                 candidaturasEvento.push(candidatura);
               }
             }
@@ -137,20 +154,20 @@ export default function MeusEventos() {
             data={eventos}
             keyExtractor={item => item.eventId}
             renderItem={({item}) => (
-              <TouchableOpacity onPress={() => openModal(item)}>
-                <Card style={styles.card}>
-                  <Card.Content style={styles.cardContent}>
-                    {item.nomeEvento && (
-                      <Text style={styles.cardTitle}>{item.nomeEvento}</Text>
-                    )}
-                    <Text style={styles.cardTitle}>{item.data}</Text>
-                    <TouchableOpacity
-                      onPress={() => excluirCandidatura(item.eventId)}>
-                      <FontAwesome name="trash" size={24} color="red" />
-                    </TouchableOpacity>
-                  </Card.Content>
-                </Card>
-              </TouchableOpacity>
+              <TouchableOpacity onPress={() => openModal({...item, eventId: item.eventId})}>
+              <Card style={styles.card}>
+                <Card.Content style={styles.cardContent}>
+                  {item.nomeEvento && (
+                    <Text style={styles.cardTitle}>{item.nomeEvento}</Text>
+                  )}
+                  <Text style={styles.cardTitle}>{item.data}</Text>
+                  <TouchableOpacity
+                    onPress={() => excluirEvento(item.eventId)}>
+                    <FontAwesome name="trash" size={24} color="red" />
+                  </TouchableOpacity>
+                </Card.Content>
+              </Card>
+            </TouchableOpacity>
             )}
           />
         ) : (
@@ -165,35 +182,33 @@ export default function MeusEventos() {
           <Background>
             {selectedEvent && (
               <View style={styles.modalContent}>
-                <Text style={styles.title}>Candidatos</Text>
+                {/* ... (resto do seu código) */}
                 {candidaturas.length > 0 ? (
                   <FlatList
                     data={candidaturas}
                     keyExtractor={item => item.id}
                     renderItem={({item}) => {
-                      if (item.userId) {
-                        const candidato = usersData[item.userId];
-                        if (candidato) {
-                          return (
-                            <TouchableOpacity
-                              style={styles.cardCandidato}
-                              onPress={() => openUserModal(item.userId)}>
-                              <Text style={styles.nomeCandidato}>
-                                {candidato.username}
-                              </Text>
-                            </TouchableOpacity>
-                          );
-                        } else {
-                          return null;
-                        }
+                      const candidato = {...usersData[item.userId], userId: item.userId};
+                      if (candidato) {
+                        return (
+                          <TouchableOpacity
+                            style={styles.cardCandidato}
+                            onPress={() => openUserModal(candidato)}>
+                            <Text style={styles.nomeCandidato}>
+                              {candidato.username}
+                            </Text>
+                          </TouchableOpacity>
+                        );
                       } else {
-                        console.log('userId não definido para o item:', item);
                         return null;
                       }
                     }}
                   />
                 ) : (
-                  <Text>Nenhuma candidatura encontrada para este evento.</Text>
+                  <Text
+                    style={{fontSize: 15, color: '#FFF', alignSelf: 'center'}}>
+                    Nenhuma candidatura encontrada para este evento.
+                  </Text>
                 )}
               </View>
             )}
@@ -223,12 +238,13 @@ export default function MeusEventos() {
             </View>
             <View style={styles.dadosContainer}>
               <Text style={styles.dados}>Nome: {selectedUser.username}</Text>
-              <TouchableOpacity onPress={() => abrirWhatsApp(selectedUser.telefone)}>
-  <Text style={styles.dados}>
-    Telefone: {selectedUser.telefone}{' '}
-    <FontAwesome name="whatsapp" color="green" size={23} />
-  </Text>
-</TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => abrirWhatsApp(selectedUser.telefone)}>
+                <Text style={styles.dados}>
+                  Telefone: {selectedUser.telefone}{' '}
+                  <FontAwesome name="whatsapp" color="green" size={23} />
+                </Text>
+              </TouchableOpacity>
               <Text style={styles.dados}>Email: {selectedUser.email}</Text>
               <Text style={styles.dados}>
                 Data de Nascimento: {selectedUser.dtNasc}
@@ -263,18 +279,14 @@ export default function MeusEventos() {
                 <TouchableOpacity
                   style={styles.contratar}
                   onPress={() => {
-                    console.log(selectedUser);
-                    console.log(selectedEvent);
-                    console.log('$$$$$$$$$$$$$$$$$');
                     if (selectedUser && selectedEvent) {
-                      diminuirVaga(selectedUser, selectedEvent);
+                      diminuirVaga( selectedUser, selectedEvent);
                     } else {
                       console.error('Usuário ou evento não selecionado.');
                     }
                   }}>
                   <Text style={styles.textStyle}>Contratar</Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity style={styles.contratar}>
                   <Text style={styles.textStyle}>Recusar</Text>
                 </TouchableOpacity>
