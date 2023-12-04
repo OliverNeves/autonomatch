@@ -7,7 +7,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'
 import Login from '../pages/Login';
 import Cadastro from '../pages/Cadastro';
 import Reset from '../pages/Reset'
-import MensagemEmpresa from '../pages/Empresa/mensagemEmpresa';
+import MensagemEmpresa from '../pages/Empresa/propostaEmpresa';
 import PerfilEmpresa from '../pages/Empresa/perfilEmpresa';
 import HomeEmpresa from '../pages/Empresa';
 import HomeTerceirizado from '../pages/Terceirizado';
@@ -16,9 +16,10 @@ import PerfilTerceirizado from '../pages/Terceirizado/perfilTerceirizado';
 import FormEmpresa from '../pages/Empresa/formEmpresa';
 import FormTerceirizado from '../pages/Terceirizado/formTerceirizado';
 import MeusEventos from '../pages/Empresa/meusEventos';
-import Proposta from '../pages/Terceirizado/propostas';
+import Proposta from '../pages/Terceirizado/propostasTerceirizado';
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import AntDesign from 'react-native-vector-icons/AntDesign'
+import Candidatos from '../pages/Empresa/candidatos';
 
 const AuthStack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -184,6 +185,13 @@ function AuthRoutes(){
             <AuthStack.Screen
             name='FormTerceirizado'
             component={FormTerceirizado}
+            options={{
+                headerShown: false,
+            }}
+            />
+            <AuthStack.Screen
+            name='PagCandidatos'
+            component={Candidatos}
             options={{
                 headerShown: false,
             }}

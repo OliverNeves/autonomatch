@@ -42,8 +42,9 @@ export default function HomeTerceirizado({ navigation }) {
             // Enviar notificação para o criador do evento
             // const notificationMessage = `Novo candidato para o evento: ${selectedEvent.nomeEvento}`;
             // await sendNotification(selectedEvent.criadorId, notificationMessage);
-    
+            console.log('Candidatando ao evento:', selectedEvent.eventId);
             setSelectedEvent(null);
+
     
             Alert.alert('Candidatura enviada', 'Sua candidatura foi enviada com sucesso.');
         } catch (error) {

@@ -23,6 +23,7 @@ export default function Eventos() {
     const [garcomCount, setGarcomCount] = useState(0);
     const [servicosGeraisCount, setServicosGeraisCount] = useState(0);
     const [modalVisible, setModalVisible] = useState(true);
+    
 
     const resetFormAndCounts = (props) => {
         props.resetForm(); // Clear the form fields
@@ -94,7 +95,7 @@ export default function Eventos() {
                     salvarDados(values);
                     resetFormAndCounts({ resetForm });
                     setSubmitting(false);
-                  }}
+                }}
             >
                 {(props) => (
                     <Container>
@@ -191,14 +192,11 @@ export default function Eventos() {
                             </View>
 
                             <TouchableOpacity
-        style={styles.enviar}
-        onPress={() => {
-          props.handleSubmit();
-          resetFormAndCounts(props);
-        }}
-      >
-        <Text style={styles.textButton}>Criar Evento</Text>
-      </TouchableOpacity>
+    style={styles.enviar}
+    onPress={() => props.submitForm()}
+>
+    <Text style={styles.textButton}>Criar Evento</Text>
+</TouchableOpacity>
                         </View>
 
                     </Container>

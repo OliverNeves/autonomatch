@@ -11,92 +11,44 @@ import {Card, Text} from 'react-native-paper';
 import {Background} from '../Login/styles';
 import {getDatabase, ref, get, remove} from 'firebase/database';
 import {auth} from '../../contexts/firebaseConfig';
-import Feather from 'react-native-vector-icons/Feather';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import {abrirWhatsApp} from './perfilEmpresa';
-import {diminuirVaga} from '../../contexts/contratar';
+import { useNavigation } from '@react-navigation/native';
 
 export default function MeusEventos() {
   const [eventos, setEventos] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState(null);
-  const [candidaturas, setCandidaturas] = useState([]);
-  const [usersData, setUsersData] = useState({});
-  const [userModalVisible, setUserModalVisible] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-
-  const excluirEvento = async eventId => {
-    try {
-      const user = auth.currentUser;
-      const userId = user.uid;
-      const db = getDatabase();
-
-      const eventoRef = ref(db, `eventos/${userId}/${eventId}`);
-
-      await remove(eventoRef);
-
-      console.log('Evento excluído com sucesso!');
-
-      const novosEventos = eventos.filter(evento => evento.eventId !== eventId);
-      setEventos(novosEventos);
-    } catch (error) {
-      console.error('Erro ao excluir evento:', error);
-    }
-  };
-
-  const openUserModal = user => {
-    setSelectedUser(user);
-    setUserModalVisible(true);
-  };
-
-  const closeUserModal = () => {
-    setSelectedUser(null);
-    setUserModalVisible(false);
-  };
-
-  const openModal = event => {
-    setSelectedEvent(event);
-    buscarCandidaturas(event.eventId);
-    setModalVisible(true);
-  };
-
-  const closeModal = () => {
-    setSelectedEvent(null);
-    setCandidaturas([]);
-    setModalVisible(false);
-  };
-
-  const buscarUsuarios = async () => {
-    const db = getDatabase();
-    const usersRef = ref(db, 'users');
-
-    try {
-      const usersSnapshot = await get(usersRef);
-      const users = usersSnapshot.val();
-
-      if (users) {
-        setUsersData(users);
-      } else {
-        setUsersData({});
-      }
-    } catch (error) {
-      console.error('Erro ao buscar usuários:', error);
-    }
-  };
-
-  const buscarEventos = async () => {
-    const db = getDatabase();
+  const navigation = useNavigation()
     const user = auth.currentUser;
     const userId = user.uid;
 
+    const excluirEvento = async eventId => {
+      try {
+        const user = auth.currentUser;
+        const userId = user.uid;
+        const db = getDatabase();
+  
+        const eventoRef = ref(db, `eventos/${userId}/${eventId}`);
+  
+        await remove(eventoRef);
+  
+        console.log('Evento excluído com sucesso!');
+  
+        const novosEventos = eventos.filter(evento => evento.eventId !== eventId);
+        setEventos(novosEventos);
+      } catch (error) {
+        console.error('Erro ao excluir evento:', error);
+      }
+    };
+
+  const buscarEventos = async () => {
+    const db = getDatabase();
     const eventosRef = ref(db, `eventos/${userId}`);
 
     try {
       const eventosSnapshot = await get(eventosRef);
-      const eventos = eventosSnapshot.val();
+      const eventosData = eventosSnapshot.val();
 
-      if (eventos) {
-        const eventosArray = Object.values(eventos).map(evento => evento);
+      if (eventosData) {
+        const eventosArray = Object.values(eventosData).map(evento => evento);
         setEventos(eventosArray);
       } else {
         setEventos([]);
@@ -106,296 +58,72 @@ export default function MeusEventos() {
     }
   };
 
-  const buscarCandidaturas = async eventId => {
-    const db = getDatabase();
-    const usersRef = ref(db, 'users');
-
-    try {
-      const usersSnapshot = await get(usersRef);
-      const usersData = usersSnapshot.val();
-
-      if (usersData) {
-        const candidaturasEvento = [];
-        for (let userId in usersData) {
-          const user = usersData[userId];
-          if (user.candidaturas) {
-            for (let candidaturaId in user.candidaturas) {
-              const candidatura = user.candidaturas[candidaturaId];
-              if (candidatura.eventId === eventId) {
-                candidatura.userId = userId;
-                console.log('userId atribuído:', userId);
-                candidaturasEvento.push(candidatura);
-              }
-            }
-          }
-        }
-
-        setCandidaturas(candidaturasEvento);
-      } else {
-        setCandidaturas([]);
-      }
-    } catch (error) {
-      console.error('Erro ao buscar candidaturas:', error);
+  useEffect(() => {
+    if (userId) {
+      buscarEventos();
     }
+  }, [userId]);
+
+  const paginaCandidatos = (evento) => {
+    console.log(evento);
+    navigation.navigate('PagCandidatos', { evento });
   };
 
-  useEffect(() => {
-    buscarEventos();
-    buscarUsuarios();
-  }, []);
+  const renderItem = ({ item }) => (
+    <TouchableOpacity onPress={() => paginaCandidatos(item)}>
+    <Card style={styles.card}>
+      <Card.Content style={styles.cardContent}>
+        <Text style={styles.cardTitle}>{item.nomeEvento}</Text>
+        <Text style={styles.cardTitle}>{item.data}</Text>
+        <Text style={styles.cardTitle}>{item.local}</Text>
+        <TouchableOpacity
+        onPress={() => excluirEvento(item.eventId)}>
+          <FontAwesome name="trash" size={24} color="red" />
+        </TouchableOpacity>
+      </Card.Content>
+    </Card>
+    </TouchableOpacity>
+  );
 
   return (
-    <>
-      <Background>
-        <Text style={styles.title}>Meus Eventos</Text>
-
-        {eventos.length > 0 ? (
-          <FlatList
-            data={eventos}
-            keyExtractor={item => item.eventId}
-            renderItem={({item}) => (
-              <TouchableOpacity onPress={() => openModal({...item, eventId: item.eventId})}>
-              <Card style={styles.card}>
-                <Card.Content style={styles.cardContent}>
-                  {item.nomeEvento && (
-                    <Text style={styles.cardTitle}>{item.nomeEvento}</Text>
-                  )}
-                  <Text style={styles.cardTitle}>{item.data}</Text>
-                  <TouchableOpacity
-                    onPress={() => excluirEvento(item.eventId)}>
-                    <FontAwesome name="trash" size={24} color="red" />
-                  </TouchableOpacity>
-                </Card.Content>
-              </Card>
-            </TouchableOpacity>
-            )}
-          />
-        ) : (
-          <Text style={styles.noEventsText}>Nenhum evento encontrado.</Text>
-        )}
-        <Modal
-          animationType="slide"
-          visible={modalVisible}
-          onRequestClose={closeModal}
-          transparent={false}
-          style={styles.fullScreenModal}>
-          <Background>
-            {selectedEvent && (
-              <View style={styles.modalContent}>
-                {/* ... (resto do seu código) */}
-                {candidaturas.length > 0 ? (
-                  <FlatList
-                    data={candidaturas}
-                    keyExtractor={item => item.id}
-                    renderItem={({item}) => {
-                      const candidato = {...usersData[item.userId], userId: item.userId};
-                      if (candidato) {
-                        return (
-                          <TouchableOpacity
-                            style={styles.cardCandidato}
-                            onPress={() => openUserModal(candidato)}>
-                            <Text style={styles.nomeCandidato}>
-                              {candidato.username}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      } else {
-                        return null;
-                      }
-                    }}
-                  />
-                ) : (
-                  <Text
-                    style={{fontSize: 15, color: '#FFF', alignSelf: 'center'}}>
-                    Nenhuma candidatura encontrada para este evento.
-                  </Text>
-                )}
-              </View>
-            )}
-            <TouchableOpacity style={styles.button} onPress={closeModal}>
-              <Text style={styles.inputText}>Fechar</Text>
-            </TouchableOpacity>
-          </Background>
-        </Modal>
-      </Background>
-      <Modal
-        animationType="slide"
-        visible={userModalVisible}
-        onRequestClose={closeUserModal}
-        transparent={false}
-        style={styles.fullScreenModal}>
-        {selectedUser && (
-          <Background>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => closeUserModal()}>
-              <Feather name="x" size={30} color="#fff" />
-            </TouchableOpacity>
-            <View style={styles.containerDados}>
-              <View style={styles.user}>
-                <FontAwesome name="user" size={115} color="#469CAC" />
-              </View>
-            </View>
-            <View style={styles.dadosContainer}>
-              <Text style={styles.dados}>Nome: {selectedUser.username}</Text>
-              <TouchableOpacity
-                onPress={() => abrirWhatsApp(selectedUser.telefone)}>
-                <Text style={styles.dados}>
-                  Telefone: {selectedUser.telefone}{' '}
-                  <FontAwesome name="whatsapp" color="green" size={23} />
-                </Text>
-              </TouchableOpacity>
-              <Text style={styles.dados}>Email: {selectedUser.email}</Text>
-              <Text style={styles.dados}>
-                Data de Nascimento: {selectedUser.dtNasc}
-              </Text>
-              <Text style={styles.dados}>
-                Especialidade:{' '}
-                {selectedUser.especialidade === 'cozinheiro'
-                  ? 'Cozinheiro(a)'
-                  : selectedUser.especialidade === 'auxiliar'
-                  ? 'Auxiliar de Cozinha'
-                  : selectedUser.especialidade === 'garcom'
-                  ? 'Garçom / Garçonete'
-                  : selectedUser.especialidade === 'sgerais'
-                  ? 'Serviços Gerais'
-                  : selectedUser.especialidade}
-              </Text>
-              <Text style={styles.dados}>Experiência: </Text>
-              <ScrollView
-                style={{
-                  borderColor: '#151A24',
-                  borderWidth: 2,
-                  width: '100%',
-                  height: 150,
-                  padding: 10,
-                  marginTop: 10,
-                  backgroundColor: 'white',
-                }}>
-                <Text style={styles.xp}>{selectedUser.experiencia}</Text>
-              </ScrollView>
-              <View
-                style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-                <TouchableOpacity
-                  style={styles.contratar}
-                  onPress={() => {
-                    if (selectedUser && selectedEvent) {
-                      diminuirVaga( selectedUser, selectedEvent);
-                    } else {
-                      console.error('Usuário ou evento não selecionado.');
-                    }
-                  }}>
-                  <Text style={styles.textStyle}>Contratar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.contratar}>
-                  <Text style={styles.textStyle}>Recusar</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Background>
-        )}
-      </Modal>
-    </>
+    <Background>
+      <Text style={styles.title}>Meus Eventos</Text>
+    <View style={styles.container}>
+    
+      <FlatList
+        data={eventos}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.eventId}
+      />
+    </View>
+    </Background>
   );
-}
+};
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 16,
+  },
   card: {
-    margin: 10,
-    borderRadius: 10,
+    marginVertical: 8,
   },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  noEventsText: {
-    fontSize: 16,
-    color: '#fff',
-    textAlign: 'center',
-    marginTop: 20,
+  cardContent:{
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   },
   title: {
     color: '#fff',
     fontSize: 25,
     alignSelf: 'center',
-    padding: 15,
-  },
-  fullScreenModal: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  cardCandidato: {
-    backgroundColor: '#fff',
-    padding: 20,
-    margin: 10,
-    borderRadius: 10,
-  },
-  button: {
-    width: 100,
-    height: 50,
-    borderRadius: 20,
-    backgroundColor: '#121212',
-    marginTop: -4,
-    alignSelf: 'center',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  inputText: {
-    color: 'white',
-    fontSize: 20,
-  },
-  dados: {
-    color: '#fff',
-    fontSize: 20,
-  },
-  dadosContainer: {
     padding: 10,
+    paddingBottom: 0,
   },
-
-  containerDados: {
-    alignItems: 'center',
-    padding: 25,
-  },
-  contratar: {
-    backgroundColor: '#121212',
-    alignSelf: 'center',
-    width: 110,
-    borderRadius: 25,
-    marginTop: 20,
-    padding: 10,
-  },
-  textStyle: {
-    color: 'white',
+  cardTitle: {
+    fontSize: 15,
     fontWeight: 'bold',
-    textAlign: 'center',
-    fontSize: 20,
-  },
-
-  user: {
-    alignItems: 'center',
-    backgroundColor: 'white',
-    marginTop: 30,
-    borderRadius: 100,
-    height: 130,
-    width: 130,
-    marginBottom: 20,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 1,
-  },
-  cardContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  xp: {
-    color: '#469CAC',
-    fontWeight: 'bold',
-    fontSize: 20,
   },
 });
+
+
+
