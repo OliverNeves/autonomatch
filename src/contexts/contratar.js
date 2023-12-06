@@ -1,86 +1,79 @@
-import { getDatabase, ref, get, update} from "firebase/database";
+import { getDatabase, ref, get, update, push, set, remove} from "firebase/database";
 import { pegarToken } from "../pages/Login";
 import messaging from '@react-native-firebase/messaging'
+import { auth } from "./firebaseConfig";
 
+export const diminuirVaga = async (selectedUser, evento) => {
+  const db = getDatabase();
+  const user = auth.currentUser;
+  const userId = user.uid;
 
-  // export const contratar = async (selectedUser, selectedEvent) => {
-  //   try {
-  //     if (!selectedUser || !selectedEvent) {
-  //       throw new Error('Usuário ou evento inválido.');
-  //     }
-  
-  //     const terceirizadoId = selectedUser && selectedUser.id;
-  //     const eventId = selectedEvent && selectedEvent.id;
+  const especialidadeParaVaga = {
+    'cozinheiro': 'cozinheiroCount',
+    'auxiliar': 'auxiliarCount',
+    'garcom': 'garcomCount',
+    'sgerais': 'servicosGeraisCount',
+  };
+
+  const vaga = especialidadeParaVaga[selectedUser.especialidade];
+
+  if (!vaga) {
+    console.error('Especialidade do usuário não reconhecida:', selectedUser.especialidade);
+    return;
+  }
 
   
-      
-  //     const token = await pegarToken(terceirizadoId); 
-  
-      
-  //     // await sendNotification(token, 'Você foi contratado!');
-  
-  //     console.log('Terceirizado contratado e notificado com sucesso.');
-  
-  //     // Diminua a vaga apropriada
-  //     await diminuirVaga(selectedUser, selectedEvent);
-  
-  //   } catch (error) {
-  //     console.error('Erro ao contratar e notificar o terceirizado:', error);
-  //   }
-  // };
-  
+  console.log(selectedUser)
 
-  export const diminuirVaga = async (selectedUser, selectedEvent) => {
-    // Obtenha as IDs do usuário e do evento
-    const userUid = selectedUser ? selectedUser.userId : null;
-    const nomeEvento = selectedEvent ? selectedEvent.nomeEvento : null;
-  
-    // Verifique se as IDs estão definidas
-    
-  
-    const db = getDatabase();
-  
-    // Buscar a especialidade do usuário
-    const userRef = ref(db, `users/${userUid}`);
-    const userSnapshot = await get(userRef);
-    const user = userSnapshot.val();
+  const eventoRef = ref(db, `eventos/${userId}/${evento.eventId}`);
 
+  try {
+    const eventoSnapshot = await get(eventoRef);
+    const eventoData = eventoSnapshot.val();
 
-    if (!user) {
-        throw new Error(`Usuário com id ${userUid} não encontrado.`);
+    if (!eventoData || eventoData[vaga] === undefined || eventoData[vaga] <= 0) {
+      console.error('Vaga não disponível para contratação.');
+      return;
     }
 
-    const especialidade = user.especialidade;
+    const atualizacao = {};
+    atualizacao[vaga] = eventoData[vaga] - 1;
 
-    // Mapear a especialidade do usuário para a contagem de vagas correspondente
-    const especialidadeParaVaga = {
-      'cozinheiro': 'cozinheiroCount',
-      'auxiliar': 'auxiliarCount',
-      'garcom': 'garcomCount',
-      'sgerais': 'servicosGeraisCount',
-    };
-    const vaga = especialidadeParaVaga[especialidade];
+    await update(eventoRef, atualizacao);
 
-    // Buscar o evento
-    const eventRef = ref(db, `eventos/${userUid}/${nomeEvento}`);
-    const eventSnapshot = await get(eventRef);
-    const event = eventSnapshot.val();
+    console.log('Vaga diminuída com sucesso!');
 
-    
+    // Contratar usuário
+    const contratacoesRef = ref(db, 'contratacoes');
+    const novaContratacaoRef = push(contratacoesRef);
+    await set(novaContratacaoRef, {
+      nome: selectedUser.username,
+      especialidade: selectedUser.especialidade,
+      nomeEvento: evento.nomeEvento,
+      nomeEmpresa: evento.nomeUsuario,
+      eventId: evento.eventId,
+    });
 
-    // Verificar se a especialidade do usuário corresponde a uma das vagas do evento
-    if (event[vaga] > 0) {
-      // Diminuir a contagem da vaga apropriada
-      const updatedEvent = {
-        ...event,
-        [vaga]: event[vaga] - 1,
-      };
+    console.log('Usuário contratado com sucesso!');
+  } catch (error) {
+    console.error('Erro ao diminuir vaga ou contratar usuário:', error);
+  }
+};
 
-      // Atualizar o evento no banco de dados
-      await update(eventRef, updatedEvent);
-    } else {
-      throw new Error(`Não há vagas disponíveis para ${especialidade}.`);
-    }
+export const recusarCandidatura = async (selectedUser, evento) => {
+  const db = getDatabase();
+
+  // Caminho para a candidatura do usuário no banco de dados
+  const candidaturaRef = ref(db, `users/${selectedUser.userId}/candidaturas/${evento.eventId}`);
+
+  try {
+    // Remover a candidatura
+    await remove(candidaturaRef);
+
+    console.log('Candidatura do usuário recusada com sucesso!');
+  } catch (error) {
+    console.error('Erro ao recusar candidatura:', error);
+  }
 };
 
   

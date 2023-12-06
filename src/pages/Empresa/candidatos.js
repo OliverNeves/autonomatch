@@ -1,12 +1,13 @@
 import React, {useState, useEffect} from 'react';
 import {FlatList, StyleSheet, TouchableOpacity, View, Modal, ScrollView} from 'react-native';
 import {Card, Text} from 'react-native-paper';
-import {getDatabase, ref, get} from 'firebase/database';
+import {getDatabase, ref, get, update, push, set, remove} from 'firebase/database';
 import {auth} from '../../contexts/firebaseConfig';
 import { Background } from '../Login/styles';
 import Feather from 'react-native-vector-icons/Feather'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { abrirWhatsApp } from './perfilEmpresa';
+import { excluirCandidatura } from '../../contexts/contratar';
 
 export default function Candidatos({route, navigation}) {
   const [candidaturas, setCandidaturas] = useState([]);
@@ -15,6 +16,7 @@ export default function Candidatos({route, navigation}) {
   const {evento} = route.params;
   const user = auth.currentUser;
   const userId = user.uid;
+
 
   const buscarCandidaturas = async eventId => {
     const db = getDatabase();
@@ -56,6 +58,8 @@ export default function Candidatos({route, navigation}) {
     }
   }, [userId]);
 
+  
+
   const openUserModal = (user) => {
     setSelectedUser(user);
     setModalVisible(true);
@@ -73,6 +77,7 @@ export default function Candidatos({route, navigation}) {
       <Card style={styles.card}>
         <Card.Content style={styles.cardContent}>
           <Text style={styles.cardTitle}>{item.userData.username}</Text>
+          
           
         </Card.Content>
       </Card>
@@ -152,17 +157,15 @@ export default function Candidatos({route, navigation}) {
                 <TouchableOpacity
                   style={styles.contratar}
                   onPress={() => {
-                    if (selectedUser && selectedEvent) {
-                      diminuirVaga( selectedUser, selectedEvent);
+                    if (selectedUser && evento) {
+                      diminuirVaga( selectedUser, evento);
                     } else {
                       console.error('Usuário ou evento não selecionado.');
                     }
                   }}>
                   <Text style={styles.textStyle}>Contratar</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.contratar}>
-                  <Text style={styles.textStyle}>Recusar</Text>
-                </TouchableOpacity>
+
               </View>
             </View>
           </Background>

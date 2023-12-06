@@ -272,9 +272,9 @@ export default function HomeEmpresa({navigation}) {
         onRequestClose={() => {
           setModalVisibleEvents(false);
         }}>
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            <Text style={styles.dados}>Seus Eventos</Text>
+        <View style={styles.modalEventos}>
+          <View style={styles.modalEventos2}>
+            <Text style={{color: 'white', alignSelf: 'center', fontSize: 25}}>Seus Eventos</Text>
             <FlatList
               data={currentUserEvents}
               keyExtractor={item => item.eventId}
@@ -285,7 +285,7 @@ export default function HomeEmpresa({navigation}) {
                     setSelectedUser(selectedUser); // Certifique-se de incluir o usuário selecionado
                     enviarProposta(item, selectedUser);
                   }}>
-                  <Card>
+                  <Card style={styles.cardEvento}>
                     <Card.Content style={styles.cardModal}>
                       <Text style={{color: '#121212', fontSize: 20}}>
                         {item.nomeEvento}
@@ -299,14 +299,15 @@ export default function HomeEmpresa({navigation}) {
               )}
             />
 
-            <TouchableOpacity
-              style={{...styles.openButton, backgroundColor: '#121212'}}
+            
+          </View>
+          <TouchableOpacity
+              style={styles.botao}
               onPress={() => {
                 setModalVisibleEvents(false);
               }}>
               <Text style={styles.textStyle}>Fechar</Text>
             </TouchableOpacity>
-          </View>
         </View>
       </Modal>
     </Background>
@@ -426,6 +427,16 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     backgroundColor: '#469CAC',
   },
+  modalEventos2: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 40,
+   
+    width: '100%', // Ajuste conforme necessário
+    alignSelf: 'center',
+    backgroundColor: '#469CAC',
+  },
   xp: {
     color: '#469CAC',
     fontWeight: 'bold',
@@ -433,5 +444,22 @@ const styles = StyleSheet.create({
   },
   cardModal: {
     flexDirection: 'row',
+    justifyContent: 'space-between'
   },
+  modalEventos:{
+    backgroundColor: '#469CAC',
+    height: '100%',
+    
+  },
+  cardEvento:{
+    margin: 10
+  },
+  botao:{
+    alignSelf: 'center',
+    backgroundColor:"#121212",
+    width:100,
+    height: 50,
+    justifyContent:'center',
+    borderRadius: 25
+  }
 });
