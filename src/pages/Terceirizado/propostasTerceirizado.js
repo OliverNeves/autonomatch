@@ -1,76 +1,173 @@
-import React, { useState } from 'react';
-import { Text, FlatList, StyleSheet, TouchableOpacity, View, Modal } from 'react-native';
-import { Card } from 'react-native-paper';
+import React, {useState, useEffect} from 'react';
+import {
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Modal,
+} from 'react-native';
+import {Card} from 'react-native-paper';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import { Background } from '../Login/styles';
+import {Background} from '../Login/styles';
+import {getDatabase, ref, onValue, remove} from 'firebase/database';
+import {auth} from '../../contexts/firebaseConfig';
 
 export default function YourComponent() {
-  const [isModalVisible, setModalVisible] = useState(false);
+  const [propostas, setPropostas] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [contratacoes, setContratacoes] = useState([]);
+  const [eventos, setEventos] = useState([]);
+  const user = auth.currentUser;
 
-  const data = [
-    { eventId: '1', nomeEvento: 'Festa', data: '10/01/2024', candidato: 'Anna Festas' },
-    { eventId: '2', nomeEvento: 'After', data: '10/01/2024', candidato: 'Lucas Matheus' },
-    // Adicione mais dados conforme necessário
-  ];
-  const data2 = [
-    { eventId: '1', nomeEvento: 'Aniversário da Maria', data: '15/03/2024', candidato: '+Diversão' },
-    { eventId: '2', nomeEvento: 'Casamento do Enzo', data: '07/08/2024', candidato: 'Lux Events' },
-    // Adicione mais dados conforme necessário
-  ];
 
-  const renderItem = ({ item }) => (
-    <Card style={styles.card}>
-      <Card.Content style={styles.content}>
-        <Text style={styles.candidaturaText}>{item.nomeEvento}</Text>
-        <Text style={styles.candidaturaText}>{item.data}</Text>
-        <Text style={styles.candidaturaText}>{item.candidato}</Text>
-        <TouchableOpacity onPress={() => { /* Ação de exclusão simulada */ }}>
-          <FontAwesome name="trash" size={24} color="red" />
-        </TouchableOpacity>
-      </Card.Content>
-    </Card>
-  );
+  useEffect(() => {
+    const terceirizadoId = auth.currentUser.uid;
+    const db = getDatabase();
+    const eventosRef = ref(db, 'eventos');
+    const contratacoesRef = ref(db, 'contratacoes');
+
+    onValue(eventosRef, snapshot => {
+      const data = snapshot.val();
+      setEventos(data || {});
+    });
+
+    onValue(contratacoesRef, snapshot => {
+      const data = snapshot.val();
+      const tempContratacoes = [];
+      for (let contratacaoId in data) {
+        const contratacao = data[contratacaoId];
+        tempContratacoes.push({ id: contratacaoId, ...contratacao });
+      }
+      setContratacoes(tempContratacoes);
+    });
+
+    onValue(eventosRef, snapshot => {
+      const data = snapshot.val();
+      const tempPropostas = [];
+      for (let eventoId in data) {
+        const evento = data[eventoId];
+        if (evento.propostas) {
+          for (let propostaId in evento.propostas) {
+            const proposta = evento.propostas[propostaId];
+            if (proposta.idTerceirizado === terceirizadoId) {
+              tempPropostas.push({id: propostaId, ...proposta});
+            }
+          }
+        }
+      }
+      setPropostas(tempPropostas);
+    });
+
+    
+  }, []);
+
+  const closeModal = () => {
+    setModalVisible(false);
+  };
+
+  const handleDelete = item => {
+    const db = getDatabase();
+    const propostaRef = ref(
+      db,
+      `eventos/${item.idEvento}/propostas/${item.id}`,
+    );
+    remove(propostaRef)
+      .then(() => {
+        console.log('Proposal deleted successfully!');
+        // Atualize o estado local após a remoção bem-sucedida
+        setPropostas(propostas.filter(proposta => proposta.id !== item.id));
+      })
+      .catch(error => {
+        console.error('Error deleting proposal:', error);
+      });
+  };
+
+  const renderItem = ({item}) => {
+    // Verifique se o item existe antes de tentar renderizá-lo
+    if (!item) {
+      return null;
+    }
+
+    return (
+      <Card style={styles.card}>
+        <Card.Content
+          style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <Text style={styles.candidaturaText}> {item.nomeEvento}</Text>
+          <Text style={styles.candidaturaText}> {item.dataEvento}</Text>
+          <Text style={styles.candidaturaText}>{item.nomeEmpresa}</Text>
+          <TouchableOpacity onPress={() => handleDelete(item)}>
+            <FontAwesome name="trash" size={24} color="red" />
+          </TouchableOpacity>
+        </Card.Content>
+      </Card>
+    );
+  };
+
+  const renderContratacao = ({ item }) => {
+    if (!item) {
+      return null;
+    }
+  
+    console.log(item); // Adicionei para verificar o conteúdo de item
+  
+    // Modifique a verificação para considerar o evento associado ao usuário atual
+    if (item.eventId && eventos[item.eventId]?.nomeUsuario === user.username) {
+      return (
+        <Card style={styles.card}>
+          <Card.Content style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+            <Text style={styles.candidaturaText}> {item.nomeEvento}</Text>
+            <Text style={styles.candidaturaText}> {item.dataEvento}</Text>
+            <Text style={styles.candidaturaText}>{item.nomeEmpresa}</Text>
+          </Card.Content>
+        </Card>
+      );
+    } else {
+      return null;
+    }
+  };
+  
 
   return (
     <Background>
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => setModalVisible(true)}
-        >
+          onPress={() => setModalVisible(true)}>
           <FontAwesome name="dollar" size={30} color="green" />
         </TouchableOpacity>
         <Text style={styles.texto}>Propostas Recebidas:</Text>
+
         <FlatList
-          data={data}
-          keyExtractor={(item) => item.eventId}
+          data={propostas}
+          keyExtractor={item => item.id}
           renderItem={renderItem}
         />
-      </View>
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.texto}>Eventos Confirmados</Text>
-            <FlatList
-              data={data2}  // Substitua pelos eventos aceitos pelo usuário
-              keyExtractor={(item) => item.eventId}
-              renderItem={renderItem}
-            />
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={styles.closeButton}
-            >
-              <Text style={{fontSize: 20, color:"#fff"}}>Fechar</Text>
-            </TouchableOpacity>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={closeModal}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              {/* Conteúdo do modal aqui */}
+              <Text style={styles.texto}>Contratações:</Text>
+              {contratacoes.length > 0 ? (
+                <FlatList
+                  data={contratacoes}
+                  keyExtractor={item => item.idContratacao}
+                  renderItem={renderContratacao}
+                />
+              ) : (
+                <Text style={styles.texto}>Sem contratações disponíveis.</Text>
+              )}
+              <TouchableOpacity style={styles.closeButton} onPress={closeModal}>
+                <Text style={styles.texto}>Fechar</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
+      </View>
     </Background>
   );
 }
@@ -80,7 +177,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   texto: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 25,
     alignSelf: 'center',
     padding: 15,
@@ -89,7 +186,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     margin: 10,
     borderRadius: 10,
-    
   },
   candidaturaText: {
     fontSize: 16,
@@ -119,22 +215,22 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#469CAC',
-    
+
     width: '100%', // Ocupar toda a largura
     height: '100%', // Ocupar toda a altura
   },
   closeButton: {
     backgroundColor: '#121212',
-    padding: 10,
+    padding: 0,
     borderRadius: 50,
     alignItems: 'center',
     justifyContent: 'center',
-    width: 200,
+    width: 150,
     alignSelf: 'center',
-    marginBottom: 10
+    marginBottom: 10,
   },
   texto: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 25,
     alignSelf: 'center',
     padding: 15,
