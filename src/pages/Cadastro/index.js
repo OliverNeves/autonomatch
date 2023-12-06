@@ -11,6 +11,7 @@ import {Background, Container, AreaInput, SubmitButton, SubmitText, } from '../L
 
 
 export default function Cadastro(){
+    // Estados para controlar os campos do formulário e exibição de erros
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
@@ -19,10 +20,14 @@ export default function Cadastro(){
     const [mensagemError, setMensagemError] = useState('')
     const [mostrarSenha, setMostrarSenha] = useState(false);
 
+    //Hook navigation para navegar entre as páginas
     const navigation = useNavigation();
 
+    //Função para lidar com cadastro do usuário
     async function handleCadastro(){
         Keyboard.dismiss();
+
+        //Validação dos campos do formulário
         if(nome == ''){
             setMensagemError('Preencha com o seu nome');
             setStatusError('nome')
@@ -33,6 +38,7 @@ export default function Cadastro(){
             setMensagemError('Digite sua senha');
             setStatusError('senha')
         }else{
+            //Chama a função cadastro após os requisitos acima serem preenchidos
             const resultado = await realizarCadastro(nome, email, senha, tipo, navigation);
             setStatusError('firebase')
             if(resultado == 'sucesso'){

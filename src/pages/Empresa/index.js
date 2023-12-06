@@ -76,8 +76,8 @@ export default function HomeEmpresa({navigation}) {
   }, []);
 
   const enviarProposta = (evento, terceirizado) => {
-    const propostasRef = ref(db, 'propostas'); // Substitua 'propostas' pelo caminho real no seu banco de dados
-
+    const db = getDatabase();
+  
     const novaProposta = {
       idEvento: evento.eventId,
       dataEvento: evento.data,
@@ -86,18 +86,21 @@ export default function HomeEmpresa({navigation}) {
       idTerceirizado: terceirizado.id,
       nomeTerceirizado: terceirizado.nome,
       especialidadeTerceirizado: terceirizado.especialidade,
-      // Adicione outros campos conforme necessário
+      tipo: 'proposta', // Add this line
+      // Add other fields as necessary
     };
-
-    // Salve a nova proposta no banco de dados
-    push(propostasRef, novaProposta)
+  
+    // Save the new proposal in the database under the 'eventos' node
+    const eventoRef = ref(db, `eventos/${evento.eventId}/propostas`);
+    push(eventoRef, novaProposta)
       .then(() => {
-        console.log('Proposta salva com sucesso!');
+        console.log('Proposal saved successfully!');
       })
       .catch(error => {
-        console.error('Erro ao salvar proposta:', error);
+        console.error('Error saving proposal:', error);
       });
   };
+  
 
   return (
     <Background>

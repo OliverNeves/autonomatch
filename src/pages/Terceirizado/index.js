@@ -54,27 +54,33 @@ export default function HomeTerceirizado({ navigation }) {
     
 
     useEffect(() => {
-    const db = getDatabase();
-    const eventosRef = ref(db, 'eventos');
-
-    onValue(eventosRef, (snapshot) => {
-        const data = snapshot.val();
-        const temp = [];
-        for (let userId in data) {
-            for (let eventId in data[userId]) {
-                const evento = {
+        const db = getDatabase();
+        const eventosRef = ref(db, 'eventos');
+      
+        onValue(eventosRef, (snapshot) => {
+          const data = snapshot.val();
+          const temp = [];
+          for (let userId in data) {
+            if (data[userId]) { // Add this line
+              for (let eventId in data[userId]) {
+                // Check if the item is an event and not a proposal
+                if (eventId.startsWith('-')) { // Assuming event IDs start with '-'
+                  const evento = {
                     userId,
                     eventId,
-                    criadorNome: data[userId].nome,  // Assumindo que o nome do usuário está armazenado no nó do usuário
+                    criadorNome: data[userId].nome,  // Assuming that the user's name is stored in the user's node
                     ...data[userId][eventId],
-                };
-                temp.push(evento);
+                  };
+                  temp.push(evento);
+                }
+              }
             }
-        }
-        setEventos(temp);
-    });
-
-}, []);
+          }
+          setEventos(temp);
+        });
+      
+      }, []);
+      
 
 
     const calcularTotalVagas = (evento) => {

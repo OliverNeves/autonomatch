@@ -40,13 +40,13 @@ export default function Login(){
     
 
     useEffect(() => {
-      
+      //Verifica se o usuário está autenticado ao carregar a tela
       const estadoUsuario = auth.onAuthStateChanged(usuario => {
         if (usuario) {
           setIsLoading(true);// Inicia o indicador de carregamento
           const db = getDatabase();
           const userRef = ref(db, 'users/' + usuario.uid);
-  
+          //Puxa as informações do usuário a partir do Firebase
           get(userRef)
             .then(snapshot => {
               const userData = snapshot.val();
@@ -58,9 +58,9 @@ export default function Login(){
                   navigation.replace('HomeTerceirizado');
                 }
               } else {
-                // Caso o tipo de usuário não seja reconhecido
-                // Você pode adicionar uma lógica aqui para lidar com isso
+                
               }
+              //Armazena o token do usuário
               if (usuario) {
                 pegarToken(usuario);
               }
@@ -79,7 +79,7 @@ export default function Login(){
     }, []);
     
       
-
+    //Função para lidar com o Login
     async function handleLogin(){
         Keyboard.dismiss();
 
@@ -90,6 +90,7 @@ export default function Login(){
             setMensagemError('A senha é obrigatória');
             setStatusError('senha')
         }else{
+          //Realiza o login após os requisitos acima serem preenchidos
             const resultado = await realizarLogin(email, senha, navigation);
             if(resultado === 'Email ou senha não conferem'){
                 setStatusError('firebase');
