@@ -12,6 +12,7 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {Background} from '../Login/styles';
 import {getDatabase, ref, onValue, remove} from 'firebase/database';
 import {auth} from '../../contexts/firebaseConfig';
+import { diminuirVaga } from '../../contexts/contratar';
 
 export default function YourComponent() {
   const [propostas, setPropostas] = useState([]);
@@ -84,23 +85,33 @@ export default function YourComponent() {
   };
 
   const renderItem = ({item}) => {
-    // Verifique se o item existe antes de tentar renderizá-lo
+    
     if (!item) {
       return null;
     }
 
+    const idTerceirizado = item.idTerceirizado
+    const especialidade = item.especialidadeTerceirizado
+    const evento = item.id
+    
+    
     return (
-      <Card style={styles.card}>
-        <Card.Content
-          style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          <Text style={styles.candidaturaText}> {item.nomeEvento}</Text>
-          <Text style={styles.candidaturaText}> {item.dataEvento}</Text>
-          <Text style={styles.candidaturaText}>{item.nomeEmpresa}</Text>
-          <TouchableOpacity onPress={() => handleDelete(item)}>
-            <FontAwesome name="trash" size={24} color="red" />
-          </TouchableOpacity>
-        </Card.Content>
-      </Card>
+      <TouchableOpacity>
+        <Card style={styles.card}>
+          <Card.Content
+            style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <Text style={styles.candidaturaText}> {item.nomeEvento}</Text>
+            <Text style={styles.candidaturaText}> {item.dataEvento}</Text>
+            <Text style={styles.candidaturaText}>{item.nomeEmpresa}</Text>
+            <TouchableOpacity onPress={() => diminuirVaga( {idTerceirizado, especialidade}, evento)}>
+              <FontAwesome name="check" size={24} color="green" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleDelete(item)}>
+              <FontAwesome name="trash" size={24} color="red" />
+            </TouchableOpacity>
+          </Card.Content>
+        </Card>
+      </TouchableOpacity>
     );
   };
 

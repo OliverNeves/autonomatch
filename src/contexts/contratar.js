@@ -2,6 +2,7 @@ import { getDatabase, ref, get, update, push, set, remove} from "firebase/databa
 import { pegarToken } from "../pages/Login";
 import messaging from '@react-native-firebase/messaging'
 import { auth } from "./firebaseConfig";
+import { Alert } from "react-native";
 
 export const diminuirVaga = async (selectedUser, evento) => {
   const db = getDatabase();
@@ -54,7 +55,7 @@ export const diminuirVaga = async (selectedUser, evento) => {
       eventId: evento.eventId,
       dataEvento: evento.data
     });
-
+    Alert.alert('Parabéns','Usuário contratado com sucesso!')
     console.log('Usuário contratado com sucesso!');
   } catch (error) {
     console.error('Erro ao diminuir vaga ou contratar usuário:', error);

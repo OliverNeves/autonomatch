@@ -6,6 +6,7 @@ import {
   Modal,
   FlatList,
   ScrollView,
+  Alert,
 } from 'react-native';
 import {Text, Searchbar, Card} from 'react-native-paper';
 import {Background} from '../Login/styles';
@@ -94,7 +95,7 @@ export default function HomeEmpresa({navigation}) {
     const eventoRef = ref(db, `eventos/${evento.eventId}/propostas`);
     push(eventoRef, novaProposta)
       .then(() => {
-        console.log('Proposta enviada com sucesso!');
+        Alert.alert('Sucesso', 'Sua proposta foi enviada!')
       })
       .catch(error => {
         console.error('Erro ao enviar proposta:', error);
@@ -163,7 +164,7 @@ export default function HomeEmpresa({navigation}) {
                   ? 'Serviços Gerais'
                   : item.especialidade}
               </Text>
-              {/* Adicione outros campos conforme necessário */}
+              
             </Card.Content>
           </Card>
         )}

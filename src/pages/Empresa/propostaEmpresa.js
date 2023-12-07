@@ -48,7 +48,7 @@ export default function PropostaEmpresa() {
 
   return (
     <Background>
-      <Text style={styles.texto}>Propostas Enviadas</Text>
+      <Text style={styles.texto}>Propostas Aceitas</Text>
       <FlatList
         data={propostas}
         keyExtractor={(item) => item.id}
