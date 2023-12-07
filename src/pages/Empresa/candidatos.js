@@ -8,6 +8,7 @@ import Feather from 'react-native-vector-icons/Feather'
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
 import { abrirWhatsApp } from './perfilEmpresa';
 import { excluirCandidatura } from '../../contexts/contratar';
+import { diminuirVaga } from '../../contexts/contratar';
 
 export default function Candidatos({route, navigation}) {
   const [candidaturas, setCandidaturas] = useState([]);

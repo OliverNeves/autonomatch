@@ -52,6 +52,7 @@ export const diminuirVaga = async (selectedUser, evento) => {
       nomeEvento: evento.nomeEvento,
       nomeEmpresa: evento.nomeUsuario,
       eventId: evento.eventId,
+      dataEvento: evento.data
     });
 
     console.log('Usuário contratado com sucesso!');

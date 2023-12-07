@@ -94,10 +94,10 @@ export default function HomeEmpresa({navigation}) {
     const eventoRef = ref(db, `eventos/${evento.eventId}/propostas`);
     push(eventoRef, novaProposta)
       .then(() => {
-        console.log('Proposal saved successfully!');
+        console.log('Proposta enviada com sucesso!');
       })
       .catch(error => {
-        console.error('Error saving proposal:', error);
+        console.error('Erro ao enviar proposta:', error);
       });
   };
   

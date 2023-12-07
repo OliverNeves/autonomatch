@@ -4,21 +4,28 @@ import { Card } from 'react-native-paper';
 import { Background } from '../Login/styles';
 import { getDatabase, ref, onValue, remove } from 'firebase/database';
 import FontAwesome from 'react-native-vector-icons/FontAwesome'
+import { auth } from '../../contexts/firebaseConfig';
 
 
 export default function PropostaEmpresa() {
   const [propostas, setPropostas] = useState([]);
-  const db = getDatabase()
-  useEffect(() => {
-    // Substitua 'propostas' pelo caminho real no seu banco de dados
-    const propostasRef = ref(db, 'propostas');
+  const db = getDatabase();
+  const empresaId = auth.currentUser.uid; // ID do usuário empresa
 
-    const unsubscribe = onValue(propostasRef, (snapshot) => {
+  useEffect(() => {
+    const eventosRef = ref(db, 'eventos');
+
+    const unsubscribe = onValue(eventosRef, (snapshot) => {
       const propostasArray = [];
 
       snapshot.forEach((childSnapshot) => {
-        const proposta = childSnapshot.val();
-        propostasArray.push(proposta);
+        const evento = childSnapshot.val();
+        if (evento[empresaId] && evento[empresaId].propostas) {
+          for (let propostaId in evento[empresaId].propostas) {
+            const proposta = evento[empresaId].propostas[propostaId];
+            propostasArray.push({ id: propostaId, ...proposta });
+          }
+        }
       });
 
       setPropostas(propostasArray);
@@ -26,30 +33,15 @@ export default function PropostaEmpresa() {
 
     // Limpar o listener ao desmontar o componente
     return () => unsubscribe();
-  }, []);
+  }, [empresaId]);
 
-  const removerProposta = (idEvento) => {
-    const propostasRef = ref(db, `propostas/${idEvento}`);
-  
-    // Remove a proposta com o ID correspondente
-    remove(propostasRef)
-      .then(() => {
-        console.log('Proposta removida com sucesso');
-      })
-      .catch((error) => {
-        console.error('Erro ao remover proposta:', error.message);
-      });
-  };
-  
   const renderItem = ({ item }) => (
     <Card style={styles.card}>
       <Card.Content style={styles.content}>
         <Text style={styles.candidaturaText}>{item.nomeTerceirizado}</Text>
         <Text style={styles.candidaturaText}>{item.nomeEvento}</Text>
         <Text style={styles.candidaturaText}>{item.dataEvento}</Text>
-        <TouchableOpacity onPress={() => removerProposta(item.idEvento)}>
-          <FontAwesome name="trash" color="red" size={25}/>
-        </TouchableOpacity>
+        {/* Adicione aqui qualquer outra informação que deseja exibir */}
       </Card.Content>
     </Card>
   );
@@ -59,7 +51,7 @@ export default function PropostaEmpresa() {
       <Text style={styles.texto}>Propostas Enviadas</Text>
       <FlatList
         data={propostas}
-        keyExtractor={(item) => item.idEvento}
+        keyExtractor={(item) => item.id}
         renderItem={renderItem}
       />
     </Background>
